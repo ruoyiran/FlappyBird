@@ -17,7 +17,9 @@ public class ColumnPool : MonoBehaviour {
 
     void Update ()
     {
-	    if(!GameManager.Instance.IsGameOver && columnObjs[0].transform.position.x < -halfOfViewWidth-0.5f)
+        if (GameManager.Instance.CurrentGameState == GameState.GameOver)
+            return;
+        if (columnObjs[0].transform.position.x < -halfOfViewWidth-0.5f)
         {
             var lastColumnPos = columnObjs[maxColumns - 1].transform.position;
             columnObjs[0].transform.position = new Vector3(lastColumnPos.x + spaceX, GetRandomY(), 0);
