@@ -205,8 +205,7 @@ public class GameManager : MonoBehaviour {
     {
         if (_communicator == null)
             _communicator = new Communicator();
-        bool success = _communicator.ConnectToServer(_ipAddress, _port);
-        print(success);
+        _communicator.ConnectToServer(_ipAddress, _port);
     }
 
     private void DisconnectNetwork()
