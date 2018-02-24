@@ -1,7 +1,23 @@
-﻿using System;
+﻿using Network;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+
+public enum GameState
+{
+    Ready,
+    Playing,
+    GameOver,
+}
+
+public enum PlayingModel
+{
+    Free = 0,
+    Network = 1,
+    AI = 2
+}
 
 public class GameManager : MonoBehaviour {
     public static GameManager Instance
@@ -31,11 +47,13 @@ public class GameManager : MonoBehaviour {
             _gameState = value;
         }
     }
+    
     private GameState _gameState;
     public Text scoreText;
     public Text finalScoreText;
     public Text bestScoreText;
     public Button restarButton;
+    public Dropdown playingModelDropdown;
     public GameObject readyStatePanel;
     public GameObject gameOverStatePanel;
 
@@ -45,17 +63,34 @@ public class GameManager : MonoBehaviour {
     private bool _gameOver = false;
     private int _score = 0;
     private int _bestScore = 0;
+    private PlayingModel _playingModel = PlayingModel.Free;
+    private Communicator _communicator;
+    private string _ipAddress = "127.0.0.1";
+    private int _port = 8008;
 
     private void Awake()
     {
         _instance = this;
         _bestScore = PlayerPrefs.GetInt(BEST_SCORE_PREPREF, 0);
         _gameState = GameState.Ready;
+        _communicator = new Communicator();
     }
 
     private void Start()
     {
+        InitPlayingModelDropdown();
         restarButton.onClick.AddListener(OnRestartButtonClicked);
+        playingModelDropdown.onValueChanged.AddListener(OnPlayingModelDropdownValueChanged);
+    }
+
+    private void InitPlayingModelDropdown()
+    {
+        List<string> options = new List<string>();
+        foreach (PlayingModel item in Enum.GetValues(typeof(PlayingModel)))
+        {
+            options.Add(item.ToString());
+        }
+        playingModelDropdown.AddOptions(options);
     }
 
     private void Update () {
@@ -71,6 +106,7 @@ public class GameManager : MonoBehaviour {
             case GameState.GameOver:
                 GameOverState();
                 SetScoreTexts();
+                DisconnectNetwork();
                 break;
             default:
                 break;
@@ -144,5 +180,38 @@ public class GameManager : MonoBehaviour {
     private void OnRestartButtonClicked()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    private void OnPlayingModelDropdownValueChanged(int index)
+    {
+        PlayingModel model = (PlayingModel)index;
+        switch (model)
+        {
+            case PlayingModel.Free:
+                DisconnectNetwork();
+                break;
+            case PlayingModel.Network:
+                ConnectToNetwork();
+                break;
+            case PlayingModel.AI:
+                DisconnectNetwork();
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void ConnectToNetwork()
+    {
+        if (_communicator == null)
+            _communicator = new Communicator();
+        bool success = _communicator.ConnectToServer(_ipAddress, _port);
+        print(success);
+    }
+
+    private void DisconnectNetwork()
+    {
+        if (_communicator != null && _communicator.IsConnected)
+            _communicator.Disconnect();
     }
 }

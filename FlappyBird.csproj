@@ -289,7 +289,6 @@
     <Compile Include="Assets\Scripts\Game\Column.cs" />
     <Compile Include="Assets\Scripts\Game\ColumnPool.cs" />
     <Compile Include="Assets\Scripts\Game\GameManager.cs" />
-    <Compile Include="Assets\Scripts\Game\GameState.cs" />
     <Compile Include="Assets\Scripts\Game\RepeatingBackground.cs" />
     <Compile Include="Assets\Scripts\Game\ScrollObject.cs" />
     <Compile Include="Assets\Scripts\Network\Communicator.cs" />

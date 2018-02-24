@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 
-namespace GridWorld.Network
+namespace Network
 {
     public class Communicator
     {
