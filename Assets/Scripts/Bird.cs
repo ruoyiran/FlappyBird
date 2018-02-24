@@ -12,7 +12,13 @@ public class Bird : MonoBehaviour {
     }
 	
 	void Update () {
-        if (!_isDead && Input.GetKeyDown(KeyCode.Space))
+        if (_isDead)
+            return;
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+        if (Input.GetKeyDown(KeyCode.Space))
+#else
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+#endif
         {
             _rb2d.velocity = Vector2.zero;
             _rb2d.AddForce(new Vector2(0, upForce));
