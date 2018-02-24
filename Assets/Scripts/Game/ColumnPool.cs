@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class ColumnPool : MonoBehaviour {
     public GameObject firstColumnObj;
@@ -8,10 +9,12 @@ public class ColumnPool : MonoBehaviour {
     public int maxColumns = 6;
     private GameObject[] columnObjs;
     private float halfOfViewWidth;
+    private float firstColumnObjPosX;
 
     private void Start()
     {
         halfOfViewWidth = Camera.main.orthographicSize * Screen.width / (float)Screen.height;
+        firstColumnObjPosX = firstColumnObj.transform.position.x;
         InitColumnObjs();
     }
 
@@ -33,20 +36,27 @@ public class ColumnPool : MonoBehaviour {
             return;
         columnObjs = new GameObject[maxColumns];
         columnObjs[0] = firstColumnObj;
-        Vector3 columnPos = firstColumnObj.transform.position;
-        firstColumnObj.transform.position = new Vector3(columnPos.x, GetRandomY(), 0);
         for (int i = 1; i < maxColumns; i++)
         {
             GameObject columnObj = Instantiate(firstColumnObj, Vector3.zero, Quaternion.identity, transform);
-            columnPos += new Vector3(spaceX, 0, 0);
-            columnObj.transform.position = new Vector3(columnPos.x, GetRandomY(), 0);
             columnObjs[i] = columnObj;
+        }
+        InitColumnObjsPos();
+    }
+
+    private void InitColumnObjsPos()
+    {
+        float startX = firstColumnObjPosX;
+        for (int i = 0; i < maxColumns; i++)
+        {
+            columnObjs[i].transform.position = new Vector3(startX, GetRandomY(), 0);
+            startX += spaceX;
         }
     }
 
     private float GetRandomY()
     {
-        float randomY = Random.Range(columnMinY, columnMaxY);
+        float randomY = UnityEngine.Random.Range(columnMinY, columnMaxY);
         return randomY;
     }
 
@@ -58,5 +68,10 @@ public class ColumnPool : MonoBehaviour {
             columnObjs[i] = columnObjs[i + 1];
         }
         columnObjs[maxColumns - 1] = t;
+    }
+
+    public void ResetPos()
+    {
+        InitColumnObjsPos();
     }
 }

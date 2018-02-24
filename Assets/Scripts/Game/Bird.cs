@@ -1,13 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class Bird : MonoBehaviour {
     public float upForce = 200f;
     private Rigidbody2D _rb2d;
     private Animator _animator;
+    private Vector3 _initPos;
+    private Quaternion _initRotation;
 
 	void Start () {
         _rb2d = GetComponent<Rigidbody2D>();
         _animator = GetComponent<Animator>();
+        _initPos = transform.position;
+        _initRotation = transform.rotation;
     }
 	
 	void Update() { 
@@ -58,5 +63,13 @@ public class Bird : MonoBehaviour {
         _rb2d.velocity = Vector2.zero;
         _animator.Play("Die");
         GameManager.Instance.CurrentGameState = GameState.GameOver;
+    }
+
+    public void Reset()
+    {
+        _rb2d.velocity = Vector2.zero;
+        transform.position = _initPos;
+        transform.rotation = _initRotation;
+        _animator.Play("Idle");
     }
 }

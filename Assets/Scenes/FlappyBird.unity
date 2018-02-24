@@ -1226,7 +1226,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 2}
-  m_SizeDelta: {x: 0, y: 180}
+  m_SizeDelta: {x: 0, y: 160}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!114 &779452360
 MonoBehaviour:
@@ -1861,6 +1861,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ef49736ca9672941acd6ae56cc8551a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  bird: {fileID: 128939133}
+  columnPool: {fileID: 1653720816}
+  backgroundMgr: {fileID: 0}
   scoreText: {fileID: 1443521791}
   finalScoreText: {fileID: 848465482}
   bestScoreText: {fileID: 927047688}

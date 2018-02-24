@@ -16,7 +16,8 @@ public enum PlayingModel
 {
     Free = 0,
     Network = 1,
-    AI = 2
+    AI = 2,
+    Training = 3,
 }
 
 public class GameManager : MonoBehaviour {
@@ -47,7 +48,7 @@ public class GameManager : MonoBehaviour {
             _gameState = value;
         }
     }
-    
+
     private GameState _gameState;
     public Text scoreText;
     public Text finalScoreText;
@@ -56,6 +57,7 @@ public class GameManager : MonoBehaviour {
     public Dropdown playingModelDropdown;
     public GameObject readyStatePanel;
     public GameObject gameOverStatePanel;
+    private static PlayingModel _lastPlayingModel;
 
     public float scrollSpeed = -2f;
     private const string BEST_SCORE_PREPREF = "BEST_SCORE_PREPREF";
@@ -63,24 +65,32 @@ public class GameManager : MonoBehaviour {
     private bool _gameOver = false;
     private int _score = 0;
     private int _bestScore = 0;
-    private PlayingModel _playingModel = PlayingModel.Free;
-    private Communicator _communicator;
+    private static PlayingModel _playingModel = PlayingModel.Free;
+    private static Communicator _communicator;
     private string _ipAddress = "127.0.0.1";
     private int _port = 8008;
 
     private void Awake()
     {
         _instance = this;
-        _bestScore = PlayerPrefs.GetInt(BEST_SCORE_PREPREF, 0);
-        _gameState = GameState.Ready;
-        _communicator = new Communicator();
     }
 
     private void Start()
     {
-        InitPlayingModelDropdown();
-        restarButton.onClick.AddListener(OnRestartButtonClicked);
-        playingModelDropdown.onValueChanged.AddListener(OnPlayingModelDropdownValueChanged);
+        
+        if (_lastPlayingModel == PlayingModel.Training)
+        {
+            _playingModel = _lastPlayingModel;
+            _gameState = GameState.Playing;
+        }
+        else
+        {
+            _gameState = GameState.Ready;
+            _bestScore = PlayerPrefs.GetInt(BEST_SCORE_PREPREF, 0);
+            InitPlayingModelDropdown();
+            restarButton.onClick.AddListener(OnRestartButtonClicked);
+            playingModelDropdown.onValueChanged.AddListener(OnPlayingModelDropdownValueChanged);
+        }
     }
 
     private void InitPlayingModelDropdown()
@@ -102,11 +112,19 @@ public class GameManager : MonoBehaviour {
                 break;
             case GameState.Playing:
                 PlayingState();
+                CheckPlayingModel();
                 break;
             case GameState.GameOver:
-                GameOverState();
-                SetScoreTexts();
-                DisconnectNetwork();
+                if (_playingModel != PlayingModel.Training)
+                {
+                    GameOverState();
+                    SetScoreTexts();
+                    DisconnectNetwork();
+                }
+                else
+                {
+                    RestartGame();
+                }
                 break;
             default:
                 break;
@@ -128,6 +146,17 @@ public class GameManager : MonoBehaviour {
         readyStatePanel.SetActive(false);
         gameOverStatePanel.SetActive(false);
         SetBoxScoreTexts();
+    }
+
+    private void CheckPlayingModel()
+    {
+        if(_playingModel == PlayingModel.Training)
+        {
+            playingModelDropdown.gameObject.SetActive(false);
+            scoreText.gameObject.SetActive(false);
+            readyStatePanel.SetActive(false);
+            gameOverStatePanel.SetActive(false);
+        }
     }
 
     private void GameOverState()
@@ -179,6 +208,11 @@ public class GameManager : MonoBehaviour {
 
     private void OnRestartButtonClicked()
     {
+        RestartGame();
+    }
+
+    private void RestartGame()
+    {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
@@ -196,16 +230,22 @@ public class GameManager : MonoBehaviour {
             case PlayingModel.AI:
                 DisconnectNetwork();
                 break;
+            case PlayingModel.Training:
+                ConnectToNetwork();
+                break;
             default:
                 break;
         }
+        _playingModel = model;
+        _lastPlayingModel = model;
     }
 
     private void ConnectToNetwork()
     {
         if (_communicator == null)
             _communicator = new Communicator();
-        _communicator.ConnectToServer(_ipAddress, _port);
+        if(!_communicator.IsConnected)
+            _communicator.ConnectToServer(_ipAddress, _port);
     }
 
     private void DisconnectNetwork()
