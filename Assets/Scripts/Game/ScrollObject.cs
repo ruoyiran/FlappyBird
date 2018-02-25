@@ -5,10 +5,11 @@ public class ScrollObject : MonoBehaviour {
     private Vector2 scrollSpeed;
     void Start () {
         _rb2d = GetComponent<Rigidbody2D>();
-        scrollSpeed = new Vector2(GameManager.Instance.scrollSpeed, 0);
+        scrollSpeed = new Vector2(GameManager.Instance.ScrollSpeed, 0);
     }
 
     void Update () {
+        scrollSpeed.x = GameManager.Instance.ScrollSpeed;
         GameState gameState = GameManager.Instance.CurrentGameState;
         switch (gameState)
         {

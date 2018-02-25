@@ -12,12 +12,19 @@ public enum GameState
     GameOver,
 }
 
-public enum PlayingModel
+public enum PlayingMode
 {
     Free = 0,
-    Network = 1,
-    AI = 2,
-    Training = 3,
+    AI = 1,
+    Network = 2,
+}
+
+
+public enum SpeedMode
+{
+    Easy = 0,
+    Normal = 1,
+    Hard = 2,
 }
 
 public class GameManager : MonoBehaviour {
@@ -54,19 +61,30 @@ public class GameManager : MonoBehaviour {
     public Text finalScoreText;
     public Text bestScoreText;
     public Button restarButton;
-    public Dropdown playingModelDropdown;
+    public Dropdown playingModeDropdown;
+    public Dropdown speedModeDropdown;
     public GameObject readyStatePanel;
     public GameObject gameOverStatePanel;
-    private static PlayingModel _lastPlayingModel;
+    private static PlayingMode _lastPlayingMode;
 
-    public float scrollSpeed = -2f;
+    public float ScrollSpeed {
+        get
+        {
+            return scrollSpeed[_speedMode];
+        }
+    }
+    private Dictionary<SpeedMode, float> scrollSpeed = new Dictionary<SpeedMode, float>()
+    {
+        { SpeedMode.Easy, -2f}, { SpeedMode.Normal, -4}, { SpeedMode.Hard, -8}
+    };
+    private static Communicator _communicator;
+    private static PlayingMode _playingMode = PlayingMode.Free;
+    private static SpeedMode _speedMode = SpeedMode.Normal;
     private const string BEST_SCORE_PREPREF = "BEST_SCORE_PREPREF";
     private static GameManager _instance;
     private bool _gameOver = false;
     private int _score = 0;
     private int _bestScore = 0;
-    private static PlayingModel _playingModel = PlayingModel.Free;
-    private static Communicator _communicator;
     private string _ipAddress = "127.0.0.1";
     private int _port = 8008;
 
@@ -78,29 +96,43 @@ public class GameManager : MonoBehaviour {
     private void Start()
     {
         
-        if (_lastPlayingModel == PlayingModel.Training)
+        if (_lastPlayingMode == PlayingMode.Network)
         {
-            _playingModel = _lastPlayingModel;
+            _playingMode = _lastPlayingMode;
             _gameState = GameState.Playing;
         }
         else
         {
             _gameState = GameState.Ready;
             _bestScore = PlayerPrefs.GetInt(BEST_SCORE_PREPREF, 0);
-            InitPlayingModelDropdown();
+            InitPlayingModeDropdown();
+            InitSpeedModeDropdown();
             restarButton.onClick.AddListener(OnRestartButtonClicked);
-            playingModelDropdown.onValueChanged.AddListener(OnPlayingModelDropdownValueChanged);
+            playingModeDropdown.onValueChanged.AddListener(OnPlayingModeDropdownValueChanged);
+            speedModeDropdown.onValueChanged.AddListener(OnSpeedModeDropdownValueChanged);
         }
     }
 
-    private void InitPlayingModelDropdown()
+    private void InitPlayingModeDropdown()
     {
         List<string> options = new List<string>();
-        foreach (PlayingModel item in Enum.GetValues(typeof(PlayingModel)))
+        foreach (PlayingMode item in Enum.GetValues(typeof(PlayingMode)))
         {
             options.Add(item.ToString());
         }
-        playingModelDropdown.AddOptions(options);
+        playingModeDropdown.AddOptions(options);
+        speedModeDropdown.value = (int)_playingMode;
+    }
+
+    private void InitSpeedModeDropdown()
+    {
+        List<string> options = new List<string>();
+        foreach (SpeedMode item in Enum.GetValues(typeof(SpeedMode)))
+        {
+            options.Add(item.ToString());
+        }
+        speedModeDropdown.AddOptions(options);
+        speedModeDropdown.value = (int)_speedMode;
     }
 
     private void Update () {
@@ -112,10 +144,10 @@ public class GameManager : MonoBehaviour {
                 break;
             case GameState.Playing:
                 PlayingState();
-                CheckPlayingModel();
+                CheckPlayingMode();
                 break;
             case GameState.GameOver:
-                if (_playingModel != PlayingModel.Training)
+                if (_playingMode != PlayingMode.Network)
                 {
                     GameOverState();
                     SetScoreTexts();
@@ -148,11 +180,11 @@ public class GameManager : MonoBehaviour {
         SetBoxScoreTexts();
     }
 
-    private void CheckPlayingModel()
+    private void CheckPlayingMode()
     {
-        if(_playingModel == PlayingModel.Training)
+        if(_playingMode == PlayingMode.Network)
         {
-            playingModelDropdown.gameObject.SetActive(false);
+            playingModeDropdown.gameObject.SetActive(false);
             scoreText.gameObject.SetActive(false);
             readyStatePanel.SetActive(false);
             gameOverStatePanel.SetActive(false);
@@ -216,28 +248,30 @@ public class GameManager : MonoBehaviour {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    private void OnPlayingModelDropdownValueChanged(int index)
+    private void OnPlayingModeDropdownValueChanged(int index)
     {
-        PlayingModel model = (PlayingModel)index;
+        PlayingMode model = (PlayingMode)index;
         switch (model)
         {
-            case PlayingModel.Free:
+            case PlayingMode.Free:
                 DisconnectNetwork();
                 break;
-            case PlayingModel.Network:
-                ConnectToNetwork();
-                break;
-            case PlayingModel.AI:
+            case PlayingMode.AI:
                 DisconnectNetwork();
                 break;
-            case PlayingModel.Training:
+            case PlayingMode.Network:
                 ConnectToNetwork();
                 break;
             default:
                 break;
         }
-        _playingModel = model;
-        _lastPlayingModel = model;
+        _playingMode = model;
+        _lastPlayingMode = model;
+    }
+
+    private void OnSpeedModeDropdownValueChanged(int index)
+    {
+        _speedMode = (SpeedMode)index;
     }
 
     private void ConnectToNetwork()
