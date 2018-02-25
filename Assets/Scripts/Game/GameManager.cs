@@ -36,14 +36,6 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    public bool IsGameOver
-    {
-        get
-        {
-            return _gameOver;
-        }
-    }
-
     public GameState CurrentGameState
     {
         get
@@ -56,6 +48,20 @@ public class GameManager : MonoBehaviour {
         }
     }
 
+    public float ScrollSpeed
+    {
+        get
+        {
+            return scrollSpeed[_speedMode];
+        }
+    }
+
+    private Dictionary<SpeedMode, float> scrollSpeed = new Dictionary<SpeedMode, float>()
+    {
+        { SpeedMode.Easy, -2f}, { SpeedMode.Normal, -4}, { SpeedMode.Hard, -8}
+    };
+
+    private const string BEST_SCORE_PREPREF = "BEST_SCORE_PREPREF";
     private GameState _gameState;
     public Text scoreText;
     public Text finalScoreText;
@@ -67,36 +73,21 @@ public class GameManager : MonoBehaviour {
     public GameObject readyStatePanel;
     public GameObject gameOverStatePanel;
     private static PlayingMode _lastPlayingMode;
-
-    public float ScrollSpeed {
-        get
-        {
-            return scrollSpeed[_speedMode];
-        }
-    }
-    private Dictionary<SpeedMode, float> scrollSpeed = new Dictionary<SpeedMode, float>()
-    {
-        { SpeedMode.Easy, -2f}, { SpeedMode.Normal, -4}, { SpeedMode.Hard, -8}
-    };
-    private static Communicator _communicator;
+    private static GameManager _instance;
     private static PlayingMode _playingMode = PlayingMode.Free;
     private static SpeedMode _speedMode = SpeedMode.Normal;
-    private const string BEST_SCORE_PREPREF = "BEST_SCORE_PREPREF";
-    private static GameManager _instance;
     private bool _gameOver = false;
     private int _score = 0;
     private int _bestScore = 0;
-    private string _ipAddress = "127.0.0.1";
-    private int _port = 8008;
 
     private void Awake()
     {
+        Application.runInBackground = true;
         _instance = this;
     }
 
     private void Start()
     {
-        
         if (_lastPlayingMode == PlayingMode.Network)
         {
             _playingMode = _lastPlayingMode;
@@ -152,7 +143,7 @@ public class GameManager : MonoBehaviour {
                 {
                     GameOverState();
                     SetScoreTexts();
-                    DisconnectNetwork();
+                    EnvironmentObserver.Instance.StopMonitoring();
                 }
                 else
                 {
@@ -162,6 +153,11 @@ public class GameManager : MonoBehaviour {
             default:
                 break;
         }
+    }
+
+    private void OnApplicationQuit()
+    {
+        EnvironmentObserver.Instance.StopMonitoring();
     }
 
     private void ReadyState()
@@ -226,6 +222,8 @@ public class GameManager : MonoBehaviour {
 
     private void OnStartGameButtonClicked()
     {
+        if (_playingMode == PlayingMode.Network)
+            EnvironmentObserver.Instance.StartMonitoring();
         _gameState = GameState.Playing;
     }
 
@@ -242,20 +240,6 @@ public class GameManager : MonoBehaviour {
     private void OnPlayingModeDropdownValueChanged(int index)
     {
         PlayingMode model = (PlayingMode)index;
-        switch (model)
-        {
-            case PlayingMode.Free:
-                DisconnectNetwork();
-                break;
-            case PlayingMode.AI:
-                DisconnectNetwork();
-                break;
-            case PlayingMode.Network:
-                ConnectToNetwork();
-                break;
-            default:
-                break;
-        }
         _playingMode = model;
         _lastPlayingMode = model;
     }
@@ -265,17 +249,4 @@ public class GameManager : MonoBehaviour {
         _speedMode = (SpeedMode)index;
     }
 
-    private void ConnectToNetwork()
-    {
-        if (_communicator == null)
-            _communicator = new Communicator();
-        if(!_communicator.IsConnected)
-            _communicator.ConnectToServer(_ipAddress, _port);
-    }
-
-    private void DisconnectNetwork()
-    {
-        if (_communicator != null && _communicator.IsConnected)
-            _communicator.Disconnect();
-    }
 }

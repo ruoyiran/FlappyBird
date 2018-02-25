@@ -2,3 +2,5 @@ Library/
 Temp/
 .vs/
 Build/
+.idea/
+__pycache__/
