@@ -60,7 +60,8 @@ public class GameManager : MonoBehaviour {
     public Text scoreText;
     public Text finalScoreText;
     public Text bestScoreText;
-    public Button restarButton;
+    public Button restartButton;
+    public Button startGameButton;
     public Dropdown playingModeDropdown;
     public Dropdown speedModeDropdown;
     public GameObject readyStatePanel;
@@ -107,7 +108,8 @@ public class GameManager : MonoBehaviour {
             _bestScore = PlayerPrefs.GetInt(BEST_SCORE_PREPREF, 0);
             InitPlayingModeDropdown();
             InitSpeedModeDropdown();
-            restarButton.onClick.AddListener(OnRestartButtonClicked);
+            restartButton.onClick.AddListener(OnRestartButtonClicked);
+            startGameButton.onClick.AddListener(OnStartGameButtonClicked);
             playingModeDropdown.onValueChanged.AddListener(OnPlayingModeDropdownValueChanged);
             speedModeDropdown.onValueChanged.AddListener(OnSpeedModeDropdownValueChanged);
         }
@@ -140,7 +142,6 @@ public class GameManager : MonoBehaviour {
         {
             case GameState.Ready:
                 ReadyState();
-                CheckInput();
                 break;
             case GameState.Playing:
                 PlayingState();
@@ -176,6 +177,8 @@ public class GameManager : MonoBehaviour {
     {
         scoreText.gameObject.SetActive(true);
         readyStatePanel.SetActive(false);
+        playingModeDropdown.gameObject.SetActive(false);
+        speedModeDropdown.gameObject.SetActive(false);
         gameOverStatePanel.SetActive(false);
         SetBoxScoreTexts();
     }
@@ -184,10 +187,11 @@ public class GameManager : MonoBehaviour {
     {
         if(_playingMode == PlayingMode.Network)
         {
+            speedModeDropdown.gameObject.SetActive(false);
             playingModeDropdown.gameObject.SetActive(false);
-            scoreText.gameObject.SetActive(false);
             readyStatePanel.SetActive(false);
             gameOverStatePanel.SetActive(false);
+            scoreText.gameObject.SetActive(false);
         }
     }
 
@@ -201,24 +205,6 @@ public class GameManager : MonoBehaviour {
     private void SetBoxScoreTexts()
     {
         scoreText.text = _score.ToString();
-    }
-
-    private void CheckInput()
-    {
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            _gameState = GameState.Playing;
-        }
-#else
-        if (Input.touchCount > 0)
-        {
-            if (Input.GetTouch(0).phase == TouchPhase.Began)
-            {
-                _gameState = GameState.Playing;
-            }
-        }
-#endif
     }
 
     private void SetScoreTexts()
@@ -236,6 +222,11 @@ public class GameManager : MonoBehaviour {
     {
         _score += 1;
         SetScoreTexts();
+    }
+
+    private void OnStartGameButtonClicked()
+    {
+        _gameState = GameState.Playing;
     }
 
     private void OnRestartButtonClicked()
