@@ -1,75 +1,78 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
-public class Bird : MonoBehaviour {
-    public float upForce = 200f;
-    private Rigidbody2D _rb2d;
-    private Animator _animator;
-    private Vector3 _initPos;
-    private Quaternion _initRotation;
+namespace FlappyBird
+{
+    public class Bird : MonoBehaviour
+    {
+        public bool IsDead { get; set; }
+        public bool BetweenInColums { get; set; }
+        public int Score { get; set; }
 
-	void Start () {
-        _rb2d = GetComponent<Rigidbody2D>();
-        _animator = GetComponent<Animator>();
-        _initPos = transform.position;
-        _initRotation = transform.rotation;
-    }
-	
-	void Update() { 
-        GameState gameState = GameManager.Instance.CurrentGameState;
-        switch (gameState)
+        private Rigidbody2D _rb2d;
+        private Animator _animator;
+        private Vector3 _initPos;
+        private Quaternion _initRotation;
+        private float _flapForce = 200f;
+        private float _gravityScale = 1f;
+
+        void Awake()
         {
-            case GameState.Ready:
-                _rb2d.simulated = false;
-                _animator.SetTrigger("Flap");
-                break;
-            case GameState.Playing:
-                _rb2d.simulated = true;
-                CheckInput();
-                break;
-            case GameState.GameOver:
-                break;
-            default:
-                break;
+            _rb2d = GetComponent<Rigidbody2D>();
+            _animator = GetComponent<Animator>();
+            _initPos = transform.position;
+            _initRotation = transform.rotation;
+            _rb2d.gravityScale = _gravityScale;
+            IsDead = false;
+            BetweenInColums = false;
         }
-    }
 
-    private void CheckInput()
-    {
-#if UNITY_EDITOR || UNITY_STANDALONE_WIN
-        if (Input.GetKeyDown(KeyCode.Space))
-#else
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
-#endif
+        public void Flap()
         {
-            BirdFlying();
+            _rb2d.velocity = Vector2.zero;
+            _rb2d.AddForce(new Vector2(0, _flapForce));
+            _animator.SetTrigger("Flap");
         }
-    }
 
-    private void BirdFlying()
-    {
-        _rb2d.velocity = Vector2.zero;
-        _rb2d.AddForce(new Vector2(0, upForce));
-        _animator.SetTrigger("Flap");
-    }
+        public void SetIsSimulated(bool simulated)
+        {
+            _rb2d.simulated = simulated;
+        }
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        BirdDied();
-    }
+        public void SetFlapForce(float flapForce)
+        {
+            _flapForce = flapForce;
+        }
 
-    private void BirdDied()
-    {
-        _rb2d.velocity = Vector2.zero;
-        _animator.Play("Die");
-        GameManager.Instance.CurrentGameState = GameState.GameOver;
-    }
+        public void SetGravity(float gravity)
+        {
+            _gravityScale = gravity;
+            _rb2d.gravityScale = _gravityScale;
+        }
 
-    public void Reset()
-    {
-        _rb2d.velocity = Vector2.zero;
-        transform.position = _initPos;
-        transform.rotation = _initRotation;
-        _animator.Play("Idle");
+        private void OnCollisionEnter2D(Collision2D collision)
+        {
+            _animator.Play("Die");
+            _rb2d.velocity = Vector2.zero;
+            IsDead = true;
+            BetweenInColums = false;
+            StartCoroutine(StopFlying());
+        }
+
+        private System.Collections.IEnumerator StopFlying()
+        {
+            yield return null;
+            _rb2d.velocity = Vector2.zero;
+        }
+
+        public void Reset()
+        {
+            IsDead = false;
+            Score = 0;
+            _rb2d.velocity = Vector2.zero;
+            _rb2d.gravityScale = _gravityScale;
+            transform.position = _initPos;
+            transform.rotation = _initRotation;
+            _animator.Play("Idle");
+        }
     }
 }
