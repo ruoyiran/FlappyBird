@@ -17,10 +17,11 @@ env = UnityEnvironment(address="127.0.0.1", port=8008)
 
 state = env.reset()
 
-for i in range(100):
+for i in range(1000):
     action = np.random.choice(bird_actions)
     state, reward, is_done = env.step(action)
     print(reward, is_done)
-    show_image(state)
+    if is_done:
+        state = env.reset()
 
 env.close()

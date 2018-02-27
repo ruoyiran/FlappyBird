@@ -40,8 +40,8 @@ namespace FlappyBird
         public GameState CurrentGameState { get { return _gameState; } }
 
         private IPlayMode _playMode;
+        private PlayingMode _currPlayingMode = PlayingMode.Free;
         private GameState _gameState = GameState.Ready;
-        private bool _autoStart = false;
 
         private void Awake()
         {
@@ -60,22 +60,12 @@ namespace FlappyBird
         {
             if (bird.IsDead)
             {
-                if (_autoStart)
-                {
-                    ResetGame();
-                    PlayGame();
-                }
-                else
+                if(_currPlayingMode != PlayingMode.Network)
                 {
                     _gameState = GameState.GameOver;
                     StopCurrentPlayingMode();
                 }
             }
-        }
-
-        public void SetAutoStart(bool autoStart)
-        {
-            _autoStart = autoStart;
         }
 
         private void StopCurrentPlayingMode()
@@ -86,9 +76,9 @@ namespace FlappyBird
 
         public void StartGame(PlayingMode mode)
         {
+            _currPlayingMode = mode;
             StopCurrentPlayingMode();
             _playMode = GetPlayMode(mode);
-            _autoStart = false;
             PlayGame();
         }
 
@@ -124,7 +114,7 @@ namespace FlappyBird
             StartGame(mode);
         }
 
-        private void ResetGame()
+        public void ResetGame()
         {
             bird.Reset();
             enviroment.Reset();

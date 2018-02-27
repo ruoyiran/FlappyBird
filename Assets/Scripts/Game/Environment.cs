@@ -7,15 +7,9 @@ namespace FlappyBird
         public Rigidbody2D[] bgRigidbodys;
         public ColumnPool columnPool;
         private float scrollSpeed = -2f;
-        private int _envImageWidth;
-        private int _envImageHeight;
+        private int _envImageWidth = 84;
+        private int _envImageHeight = 84;
 
-        private void Start()
-        {
-            _envImageWidth = Screen.width;
-            _envImageHeight = Screen.height;
-        }
-        private int index = 0;
         private void Update()
         {
             GameState gameState = GameManager.Instance.CurrentGameState;

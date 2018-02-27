@@ -40,7 +40,6 @@ namespace FlappyBird
         public new void Play()
         {
             base.Play();
-            GameManager.Instance.SetAutoStart(true);
             ConnectToNetwork();
         }
 
@@ -105,7 +104,7 @@ namespace FlappyBird
                     Reset();
                     break;
                 case GameCommand.STEP:
-                    StartCoroutine(Step());
+                    Step();
                     break;
                 case GameCommand.QUIT:
                     DisconnectNetwork();
@@ -117,14 +116,20 @@ namespace FlappyBird
 
         private void Reset()
         {
+            GameManager.Instance.ResetGame();
             SendDataBytesToServer(GameManager.Instance.enviroment.GetEnvironmentImageBytes());
         }
 
-        private IEnumerator Step()
+        private void Step()
         {
             NotifyServerDataReceived();
             ExecStepAction();
-            yield return null;
+            StartCoroutine(DelaySendEnvronmentStateToServer());
+        }
+
+        private IEnumerator DelaySendEnvronmentStateToServer()
+        {
+            yield return new UnityEngine.WaitForEndOfFrame();
             SendEnvronmentStateToServer();
         }
 
