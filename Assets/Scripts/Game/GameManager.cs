@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace FlappyBird
 {
@@ -32,13 +33,15 @@ namespace FlappyBird
                 return _instance;
             }
         }
+        private static GameManager _instance;
+
         public Bird bird;
         public Environment enviroment;
         public GameState CurrentGameState { get { return _gameState; } }
 
         private IPlayMode _playMode;
-        private static GameManager _instance;
         private GameState _gameState = GameState.Ready;
+        private bool _autoStart = false;
 
         private void Awake()
         {
@@ -57,9 +60,22 @@ namespace FlappyBird
         {
             if (bird.IsDead)
             {
-                _gameState = GameState.GameOver;
-                StopCurrentPlayingMode();
+                if (_autoStart)
+                {
+                    ResetGame();
+                    PlayGame();
+                }
+                else
+                {
+                    _gameState = GameState.GameOver;
+                    StopCurrentPlayingMode();
+                }
             }
+        }
+
+        public void SetAutoStart(bool autoStart)
+        {
+            _autoStart = autoStart;
         }
 
         private void StopCurrentPlayingMode()
@@ -72,6 +88,7 @@ namespace FlappyBird
         {
             StopCurrentPlayingMode();
             _playMode = GetPlayMode(mode);
+            _autoStart = false;
             PlayGame();
         }
 

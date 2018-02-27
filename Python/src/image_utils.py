@@ -8,6 +8,8 @@
 import io
 from PIL import Image
 import numpy as np
+import matplotlib.pyplot as plt
+import cv2 as cv
 
 def process_pixels(image_bytes=None):
     s = bytearray(image_bytes)
@@ -16,3 +18,9 @@ def process_pixels(image_bytes=None):
 
 def normalize(image):
     return image/255.0
+
+def show_image(image):
+    # cv.imshow("Image", image)
+    # cv.waitKey()
+    plt.imshow(image)
+    plt.show()

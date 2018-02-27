@@ -4,6 +4,11 @@ namespace FlappyBird
 {
     public class Bird : MonoBehaviour
     {
+        public enum Action
+        {
+            Idle = 0,
+            Flap = 1,
+        }
         public bool IsDead { get; set; }
         public bool BetweenInColums { get; set; }
         public int Score { get; set; }
@@ -14,16 +19,26 @@ namespace FlappyBird
         private Quaternion _initRotation;
         private float _flapForce = 3f;
         private float _gravityScale = 1f;
+        private float _topBoundY = 0;
 
-        void Awake()
+        private void Awake()
         {
             _rb2d = GetComponent<Rigidbody2D>();
             _animator = GetComponent<Animator>();
             _initPos = transform.position;
             _initRotation = transform.rotation;
             _rb2d.gravityScale = _gravityScale;
+            _topBoundY = Camera.main.orthographicSize;
             IsDead = false;
             BetweenInColums = false;
+        }
+
+        private void Update()
+        {
+            if(transform.position.y > _topBoundY)
+            {
+                transform.position = new Vector3(transform.position.x, _topBoundY, transform.position.z);
+            }
         }
 
         public void Flap()
@@ -31,6 +46,12 @@ namespace FlappyBird
             _rb2d.velocity = Vector2.zero;
             _rb2d.AddForce(_flapForce * Vector2.up * Time.deltaTime * 1000);
             _animator.SetTrigger("Flap");
+        }
+
+        public void Flap(Action action)
+        {
+            if (action == Action.Flap)
+                Flap();
         }
 
         public void SetIsSimulated(bool simulated)

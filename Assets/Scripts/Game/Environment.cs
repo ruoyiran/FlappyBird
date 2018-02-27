@@ -4,10 +4,18 @@ namespace FlappyBird
 {
     public class Environment : MonoBehaviour
     {
-        public float scrollSpeed = -2f;
         public Rigidbody2D[] bgRigidbodys;
         public ColumnPool columnPool;
+        private float scrollSpeed = -2f;
+        private int _envImageWidth;
+        private int _envImageHeight;
 
+        private void Start()
+        {
+            _envImageWidth = Screen.width;
+            _envImageHeight = Screen.height;
+        }
+        private int index = 0;
         private void Update()
         {
             GameState gameState = GameManager.Instance.CurrentGameState;
@@ -74,6 +82,15 @@ namespace FlappyBird
         public void SetMaxColumnGapY(float gapY)
         {
             columnPool.SetMaxColumnGapY(gapY);
+        }
+
+        public byte[] GetEnvironmentImageBytes()
+        {
+            Texture2D tex = ImageTool.RenderToTex(Camera.main, _envImageWidth, _envImageHeight);
+            byte[] imageBytes = tex.EncodeToPNG();
+            DestroyImmediate(tex);
+            Resources.UnloadUnusedAssets();
+            return imageBytes;
         }
     }
 }

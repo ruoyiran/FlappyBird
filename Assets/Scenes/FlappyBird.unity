@@ -431,7 +431,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fde96ab1effb7f641a54e30313bedb17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scrollSpeed: -2
   bgRigidbodys:
   - {fileID: 2025302931}
   - {fileID: 1073738524}
@@ -3556,10 +3555,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firstColumnObj: {fileID: 1619324610}
-  spaceX: 4.5
-  columnMinY: -4.5
-  columnMaxY: -1.5
-  maxColumns: 6
 --- !u!1 &1915055649
 GameObject:
   m_ObjectHideFlags: 0
