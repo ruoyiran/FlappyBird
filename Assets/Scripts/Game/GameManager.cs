@@ -46,6 +46,7 @@ namespace FlappyBird
         private void Awake()
         {
             _instance = this;
+            Application.runInBackground = true;
         }
 
         private void Start()

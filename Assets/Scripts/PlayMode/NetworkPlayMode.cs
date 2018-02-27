@@ -116,6 +116,7 @@ namespace FlappyBird
 
         private void Reset()
         {
+            Logger.Print("=============== Reset ===============");
             GameManager.Instance.ResetGame();
             SendDataBytesToServer(GameManager.Instance.enviroment.GetEnvironmentImageBytes());
         }
