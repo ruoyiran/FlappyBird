@@ -292,6 +292,7 @@
     <Compile Include="Assets\Scripts\Game\Column.cs" />
     <Compile Include="Assets\Scripts\Game\ColumnPool.cs" />
     <Compile Include="Assets\Scripts\Game\Environment.cs" />
+    <Compile Include="Assets\Scripts\Game\GameConfig.cs" />
     <Compile Include="Assets\Scripts\Game\GameManager.cs" />
     <Compile Include="Assets\Scripts\Game\RepeatingBackground.cs" />
     <Compile Include="Assets\Scripts\Game\UIManager.cs" />

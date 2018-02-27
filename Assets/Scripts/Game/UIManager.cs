@@ -7,21 +7,6 @@ namespace FlappyBird
 {
     public class UIManager : MonoBehaviour
     {
-        struct GameParams
-        {
-            public float scrollSpeed;
-            public float flapForce;
-            public float gravity;
-            public float maxGapY;
-            public GameParams(float scrollSpeed = -2f, float flapForce = 15f, float gravity = 1.0f, float maxGapY = 1.5f)
-            {
-                this.scrollSpeed = scrollSpeed;
-                this.flapForce = flapForce;
-                this.gravity = gravity;
-                this.maxGapY = maxGapY;
-            }
-        }
-
         public Text scoreText;
         public Text finalScoreText;
         public Text bestScoreText;
@@ -37,12 +22,6 @@ namespace FlappyBird
         private static SpeedMode _speedMode = SpeedMode.Normal;
         private int _score;
         private int _bestScore = 0;
-        private Dictionary<SpeedMode, GameParams> _gameConfig = new Dictionary<SpeedMode, GameParams>()
-        {
-            { SpeedMode.Easy, new GameParams(-4f, 14f, 1.5f, 1.5f) },
-            { SpeedMode.Normal, new GameParams(-6f, 16f, 1.8f, 1.5f) },
-            { SpeedMode.Hard, new GameParams(-8f, 18f, 2.0f, 1.3f) }
-        };
 
         void Start()
         {
@@ -154,7 +133,7 @@ namespace FlappyBird
 
         private void SetGameParams()
         {
-            GameParams param = _gameConfig[_speedMode];
+            GameParams param = GameConfig.ConfigParams[_speedMode];
             GameManager.Instance.enviroment.SetMaxColumnGapY(param.maxGapY);
             GameManager.Instance.enviroment.SetScrollSpeed(param.scrollSpeed);
             GameManager.Instance.bird.SetFlapForce(param.flapForce);
