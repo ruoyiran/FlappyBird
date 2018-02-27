@@ -12,7 +12,7 @@ namespace FlappyBird
         private Animator _animator;
         private Vector3 _initPos;
         private Quaternion _initRotation;
-        private float _flapForce = 200f;
+        private float _flapForce = 3f;
         private float _gravityScale = 1f;
 
         void Awake()
@@ -29,7 +29,7 @@ namespace FlappyBird
         public void Flap()
         {
             _rb2d.velocity = Vector2.zero;
-            _rb2d.AddForce(new Vector2(0, _flapForce));
+            _rb2d.AddForce(_flapForce * Vector2.up * Time.deltaTime * 1000);
             _animator.SetTrigger("Flap");
         }
 

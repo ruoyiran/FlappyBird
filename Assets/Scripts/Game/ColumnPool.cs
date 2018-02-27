@@ -5,7 +5,7 @@ namespace FlappyBird
     public class ColumnPool : MonoBehaviour
     {
         public GameObject firstColumnObj;
-        private const float MAX_COLUMN_GAP_Y = 1.5f;
+        private float maxColumnGapY = 1.5f;
         private float spaceX = 5f;
         private float columnMinY = -4.5f;
         private float columnMaxY = -1.5f;
@@ -78,13 +78,14 @@ namespace FlappyBird
                 startX += spaceX;
             }
         }
+
         private float GetRandomY()
         {
             float randomY = Random.Range(columnMinY, columnMaxY);
             float gapY = Mathf.Abs(_prevColumnY - randomY);
-            if (gapY > MAX_COLUMN_GAP_Y)
+            if (gapY > maxColumnGapY)
             {
-                gapY = MAX_COLUMN_GAP_Y;
+                gapY = maxColumnGapY;
                 if (randomY < _prevColumnY)
                     randomY += gapY;
                 else
@@ -111,6 +112,11 @@ namespace FlappyBird
         public void ResetPos()
         {
             InitColumnObjsPos();
+        }
+
+        public void SetMaxColumnGapY(float gapY)
+        {
+            maxColumnGapY = gapY;
         }
     }
 }

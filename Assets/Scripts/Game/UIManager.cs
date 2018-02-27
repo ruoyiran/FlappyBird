@@ -12,11 +12,13 @@ namespace FlappyBird
             public float scrollSpeed;
             public float flapForce;
             public float gravity;
-            public GameParams(float scrollSpeed = -2f, float flapForce = 200f, float gravity = 1.0f)
+            public float maxGapY;
+            public GameParams(float scrollSpeed = -2f, float flapForce = 15f, float gravity = 1.0f, float maxGapY = 1.5f)
             {
                 this.scrollSpeed = scrollSpeed;
                 this.flapForce = flapForce;
                 this.gravity = gravity;
+                this.maxGapY = maxGapY;
             }
         }
 
@@ -37,9 +39,9 @@ namespace FlappyBird
         private int _bestScore = 0;
         private Dictionary<SpeedMode, GameParams> _gameConfig = new Dictionary<SpeedMode, GameParams>()
         {
-            { SpeedMode.Easy, new GameParams(-4f, 200f, 1.5f) },
-            { SpeedMode.Normal, new GameParams(-6f, 200f, 1.8f) },
-            { SpeedMode.Hard, new GameParams(-8f, 300f, 2.0f) }
+            { SpeedMode.Easy, new GameParams(-4f, 14f, 1.5f, 1.5f) },
+            { SpeedMode.Normal, new GameParams(-6f, 16f, 1.8f, 1.5f) },
+            { SpeedMode.Hard, new GameParams(-8f, 18f, 2.0f, 1.3f) }
         };
 
         void Start()
@@ -50,7 +52,7 @@ namespace FlappyBird
             restartButton.onClick.AddListener(OnRestartButtonClicked);
             startGameButton.onClick.AddListener(OnStartGameButtonClicked);
             speedModeDropdown.onValueChanged.AddListener(OnSpeedModeDropdownValueChanged);
-            GameManager.Instance.enviroment.SetScrollSpeed(_gameConfig[_speedMode].scrollSpeed);
+            SetGameParams();
         }
 
         private void Update()
@@ -147,7 +149,13 @@ namespace FlappyBird
         private void OnSpeedModeDropdownValueChanged(int index)
         {
             _speedMode = (SpeedMode)index;
+            SetGameParams();
+        }
+
+        private void SetGameParams()
+        {
             GameParams param = _gameConfig[_speedMode];
+            GameManager.Instance.enviroment.SetMaxColumnGapY(param.maxGapY);
             GameManager.Instance.enviroment.SetScrollSpeed(param.scrollSpeed);
             GameManager.Instance.bird.SetFlapForce(param.flapForce);
             GameManager.Instance.bird.SetGravity(param.gravity);

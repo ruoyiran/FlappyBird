@@ -70,5 +70,10 @@ namespace FlappyBird
         {
             columnPool.ResetPos();
         }
+
+        public void SetMaxColumnGapY(float gapY)
+        {
+            columnPool.SetMaxColumnGapY(gapY);
+        }
     }
 }
