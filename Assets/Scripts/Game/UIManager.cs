@@ -19,7 +19,7 @@ namespace FlappyBird
 
         private const string BEST_SCORE_PREPREF = "BEST_SCORE_PREPREF";
         private static PlayingMode _playingMode = PlayingMode.Free;
-        private static SpeedMode _speedMode = SpeedMode.Normal;
+        private static SpeedMode _speedMode = SpeedMode.Middle;
         private int _score;
         private int _bestScore = 0;
 

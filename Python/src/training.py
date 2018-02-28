@@ -61,8 +61,10 @@ if __name__ == '__main__':
     h_size = 512
     learning_rate = 0.0001
     n_actions = 2
-    mainQN = DeepQNetwork(h_size, n_actions, learning_rate)
-    targetQN = DeepQNetwork(h_size, n_actions, learning_rate)
+    with tf.variable_scope("MainQNetwork"):
+        mainQN = DeepQNetwork(h_size, n_actions, learning_rate)
+    with tf.variable_scope("TargetQNetwork"):
+        targetQN = DeepQNetwork(h_size, n_actions, learning_rate)
     pre_train_steps = 10000
     total_steps = 1000000
     anneling_steps = 10000.
@@ -80,6 +82,9 @@ if __name__ == '__main__':
     saver = tf.train.Saver()
     path = "./dqn"  # The path to save our model to.
     with tf.Session() as sess:
+        if False:
+            writer = tf.summary.FileWriter(logdir="../log", graph=sess.graph)
+            writer.close()
         sess.run(tf.global_variables_initializer())
         update_target(targetOps, sess)
         s = env.reset()
@@ -125,11 +130,11 @@ if __name__ == '__main__':
             if step > 0 and step % 25 == 0:
                 print("step: {}, average reward of last 25 episodes {}, e: {}".format(step, np.mean(rList), e))
                 rList = []
-            if step % 1000 == 0:
+            if step > 0 and step % 100000 == 0:
                 model_path = "{}/model-{}.ckpt".format(path, step)
                 print("===> Step: {}, Saving mode to {}".format(step, model_path))
                 saver.save(sess=sess, save_path=model_path)
-            if step > 0 and step % 10000 == 0:
-                export_graph(sess, path, target_nodes="Qout")
-        export_graph(sess, path, target_nodes="Qout")
+            # if step > 0 and step % 10000 == 0:
+            #     export_graph(sess, path, target_nodes="MainQNetwork/Qout/QValue")
+        export_graph(sess, path, target_nodes="MainQNetwork/Qout/QValue")
         print("Training finished.")

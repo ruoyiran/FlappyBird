@@ -20,7 +20,7 @@ namespace FlappyBird
     public enum SpeedMode
     {
         Easy = 0,
-        Normal = 1,
+        Middle = 1,
         Hard = 2,
     }
 
