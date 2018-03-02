@@ -5,16 +5,16 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{6EB6BA08-C108-C0B1-99E5-30E9A0227464}</ProjectGuid>
+    <ProjectGuid>{CDA2B324-FB27-8C93-A7C8-36CC12224D30}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>Assembly-CSharp</AssemblyName>
+    <AssemblyName>Assembly-CSharp-Editor</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
     <CompilerResponseFile></CompilerResponseFile>
-    <UnityProjectType>Game:1</UnityProjectType>
+    <UnityProjectType>Editor:5</UnityProjectType>
     <UnityBuildTarget>Android:13</UnityBuildTarget>
     <UnityVersion>2017.3.0f3</UnityVersion>
     <RootNamespace></RootNamespace>
@@ -288,47 +288,20 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Game\Bird.cs" />
-    <Compile Include="Assets\Scripts\Game\Column.cs" />
-    <Compile Include="Assets\Scripts\Game\ColumnPool.cs" />
-    <Compile Include="Assets\Scripts\Game\Environment.cs" />
-    <Compile Include="Assets\Scripts\Game\GameCommand.cs" />
-    <Compile Include="Assets\Scripts\Game\GameConfig.cs" />
-    <Compile Include="Assets\Scripts\Game\GameManager.cs" />
-    <Compile Include="Assets\Scripts\Game\RepeatingBackground.cs" />
-    <Compile Include="Assets\Scripts\Game\UIManager.cs" />
-    <Compile Include="Assets\Scripts\Network\Communicator.cs" />
-    <Compile Include="Assets\Scripts\Network\MessageObject.cs" />
-    <Compile Include="Assets\Scripts\PlayMode\AIPlayMode.cs" />
-    <Compile Include="Assets\Scripts\PlayMode\BasePlayMode.cs" />
-    <Compile Include="Assets\Scripts\PlayMode\FreePlayMode.cs" />
-    <Compile Include="Assets\Scripts\PlayMode\IPlayMode.cs" />
-    <Compile Include="Assets\Scripts\PlayMode\NetworkPlayMode.cs" />
-    <Compile Include="Assets\Scripts\Utils\Algorithm.cs" />
-    <Compile Include="Assets\Scripts\Utils\DevSwitch.cs" />
-    <Compile Include="Assets\Scripts\Utils\ImageTool.cs" />
-    <Compile Include="Assets\Scripts\Utils\Logger.cs" />
-    <Compile Include="Assets\Scripts\Utils\Singleton.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\AudioRecorder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\AudioEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\EncoderBase.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\ExrEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\fcAPI.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\FlacEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\FrameEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\GifEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\MovieEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\MP4Encoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\OggEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\PngEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\WaveEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Encoder\WebMEncoder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\FrameRecorder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\GBufferRecorder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Misc\Bool.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\Misc\DataPath.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\MovieRecorder.cs" />
-    <Compile Include="Assets\UTJ\FrameCapturer\Scripts\RecorderBase.cs" />
+    <ProjectReference Include="FlappyBird.csproj">
+      <Project>{6EB6BA08-C108-C0B1-99E5-30E9A0227464}</Project>
+      <Name>FlappyBird</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Assets\UTJ\FrameCapturer\Editor\AudioEncoderConfigDrawer.cs" />
+    <Compile Include="Assets\UTJ\FrameCapturer\Editor\AudioRecorderEditor.cs" />
+    <Compile Include="Assets\UTJ\FrameCapturer\Editor\GBufferRecorderEditor.cs" />
+    <Compile Include="Assets\UTJ\FrameCapturer\Editor\Misc\BoolDrawer.cs" />
+    <Compile Include="Assets\UTJ\FrameCapturer\Editor\Misc\DataPathDrawer.cs" />
+    <Compile Include="Assets\UTJ\FrameCapturer\Editor\MovieEncoderConfigDrawer.cs" />
+    <Compile Include="Assets\UTJ\FrameCapturer\Editor\MovieRecorderEditor.cs" />
+    <Compile Include="Assets\UTJ\FrameCapturer\Editor\RecorderBaseEditor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\StreamingAssets\UTJ\FrameCapturer\License.txt" />

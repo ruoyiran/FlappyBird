@@ -5,3 +5,4 @@ Build/
 .idea/
 __pycache__/
 dqn/
+Capture/
