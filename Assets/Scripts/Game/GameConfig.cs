@@ -22,7 +22,7 @@ namespace FlappyBird
         public static Dictionary<SpeedMode, GameParams> ConfigParams = new Dictionary<SpeedMode, GameParams>()
         {
             { SpeedMode.Easy, new GameParams(-4f, 14f, 1.5f, 1.5f) },
-            { SpeedMode.Normal, new GameParams(-6f, 16f, 1.8f, 1.5f) },
+            { SpeedMode.Middle, new GameParams(-6f, 16f, 1.8f, 1.5f) },
             { SpeedMode.Hard, new GameParams(-8f, 18f, 2.0f, 1.3f) }
         };
     }

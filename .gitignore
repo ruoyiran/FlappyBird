@@ -5,4 +5,8 @@ Build/
 .idea/
 __pycache__/
 dqn/
+<<<<<<< HEAD
 Capture/
+=======
+log/
+>>>>>>> origin/master
