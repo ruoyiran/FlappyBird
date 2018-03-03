@@ -7,21 +7,11 @@
 '''
 import numpy as np
 from unity_environment import UnityEnvironment
-from PIL import Image
 from data_preprocessing import DataPrerocessing
 
 import tensorflow as tf
 import image_utils
-def show_image(data_bytes):
-    data = np.asarray(list(data_bytes), dtype=np.uint8)
-    data = np.reshape(data, (768, 1366//2, 3))
-    img_3 = Image.fromarray(data)
-    img_3.show()
 
-def preprocess_data(data):
-    data = np.array(list(data), dtype=np.float32)
-    data /= 255.0
-    return data
 
 env = UnityEnvironment()
 s = env.reset()
@@ -31,9 +21,17 @@ with tf.Session() as sess:
     image = dp.run(sess, s)
     image_utils.show_image(image, "gray")
 
-    for i in range(1):
-        s, r, d = env.step(np.random.choice(2))
+    for i in range(100):
+        action = np.random.choice(2)
+        s, r, d = env.step(action)
+        print(action, r, d)
         image = dp.run(sess, s)
         image_utils.show_image(image, "gray")
+        if d:
+            print("reset")
+            s = env.reset()
+            image = dp.run(sess, s)
+            image_utils.show_image(image, "gray")
+
 
 env.close()

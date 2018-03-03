@@ -14,6 +14,7 @@ namespace FlappyBird
         private Communicator _communicator;
         private string _ipAddress = "127.0.0.1";
         private int _port = 8008;
+        private GameCommand _currentCommand = GameCommand.STANDBY;
 
         private void Start()
         {
@@ -24,14 +25,22 @@ namespace FlappyBird
         private new void Update()
         {
             base.Update();
+
         }
 
         private void LateUpdate()
         {
             if (_isPlaying && NetworkIsConnected())
             {
-                GameCommand cmd = GetCommand();
-                DoCommand(cmd);
+                if(_currentCommand == GameCommand.STANDBY)
+                {
+                    GameCommand cmd = GetCommand();
+                    DoCommand(cmd);
+                }
+                else
+                {
+                    DoCurrentCommand();
+                }
             }
         }
 
@@ -96,17 +105,23 @@ namespace FlappyBird
                 return GameCommand.STEP;
             else if (data == GameCommand.QUIT.ToString())
                 return GameCommand.QUIT;
-            return GameCommand.UNKNOWN;
+            return GameCommand.STANDBY;
         }
 
         private void DoCommand(GameCommand cmd)
         {
+            _currentCommand = cmd;
             switch (cmd)
             {
                 case GameCommand.RESET:
+                    GameManager.Instance.ResetGame();
+                    GameManager.Instance.frameRecorder.BeginRecording();
                     Reset();
                     break;
                 case GameCommand.STEP:
+                    NotifyServerDataReceived();
+                    GameManager.Instance.frameRecorder.BeginRecording();
+                    ExecStepAction();
                     Step();
                     break;
                 case GameCommand.QUIT:
@@ -117,32 +132,46 @@ namespace FlappyBird
             }
         }
 
+        private void DoCurrentCommand()
+        {
+            switch (_currentCommand)
+            {
+                case GameCommand.STANDBY:
+                    break;
+                case GameCommand.RESET:
+                    Reset();
+                    break;
+                case GameCommand.STEP:
+                    Step();
+                    break;
+                case GameCommand.QUIT:
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private void Reset()
         {
-            GameManager.Instance.ResetGame();
-            StartCoroutine(CaptureFrame((imageData) => {
+            if (GameManager.Instance.frameRecorder.IsCaptured)
+            {
+                byte[] imageData = GameManager.Instance.frameRecorder.GetFrameImageData();
                 SendDataBytesToServer(Algorithm.AppendLength(imageData));
-            }));
+                GameManager.Instance.frameRecorder.EndRecording();
+                _currentCommand = GameCommand.STANDBY;
+            }
         }
 
         private void Step()
         {
-            NotifyServerDataReceived();
-            ExecStepAction();
-            StartCoroutine(CaptureFrame((imageData) => { SendEnvronmentStateToServer(imageData); }));
-        }
-
-        private IEnumerator CaptureFrame(CaptureFrameDataDoneHandler doneHandler)
-        {
-            GameManager.Instance.frameRecorder.BeginRecording();
-            while (!GameManager.Instance.frameRecorder.IsCaptured)
+            if(GameManager.Instance.frameRecorder.IsCaptured &&
+               (GameManager.Instance.bird.IsTop || GameManager.Instance.bird.IsDead))
             {
-                yield return null;
+                byte[] imageData = GameManager.Instance.frameRecorder.GetFrameImageData();
+                SendEnvronmentStateToServer(imageData);
+                GameManager.Instance.frameRecorder.EndRecording();
+                _currentCommand = GameCommand.STANDBY;
             }
-            byte[] imageData = GameManager.Instance.frameRecorder.GetFrameImageData();
-            if (doneHandler != null)
-                doneHandler(imageData);
-            GameManager.Instance.frameRecorder.EndRecording();
         }
 
         private void ExecStepAction()

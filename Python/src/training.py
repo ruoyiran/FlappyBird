@@ -84,7 +84,7 @@ if __name__ == "__main__":
     path = "./dqn"  # The path to save our model to.
     dp = DataPrerocessing()
     with tf.Session() as sess:
-        if True:
+        if False:
             writer = tf.summary.FileWriter(logdir="../log", graph=sess.graph)
             writer.close()
         sess.run(tf.global_variables_initializer())
@@ -137,7 +137,7 @@ if __name__ == "__main__":
             if step > 0 and step % 25 == 0:
                 print("step: {}, average reward of last 25 episodes {}, e: {}".format(step, np.mean(rList), e))
                 rList = []
-            if step > 0 and step % 100000 == 0:
+            if step > 0 and step % 10000 == 0:
                 model_path = "{}/model-{}.ckpt".format(path, step)
                 print("===> Step: {}, Saving mode to {}".format(step, model_path))
                 saver.save(sess=sess, save_path=model_path)

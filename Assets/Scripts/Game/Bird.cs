@@ -12,7 +12,13 @@ namespace FlappyBird
         public bool IsDead { get; set; }
         public bool BetweenInColums { get; set; }
         public int Score { get; set; }
-
+        public bool IsTop {
+            get {
+                if (_rb2d == null)
+                    return true;
+                return _rb2d.velocity.y < 0;
+            }
+        }
         private Rigidbody2D _rb2d;
         private Animator _animator;
         private Vector3 _initPos;
@@ -53,7 +59,8 @@ namespace FlappyBird
             if (action == Action.Flap)
                 Flap();
             else if (action == Action.Idle)
-                _rb2d.velocity = Vector2.zero;
+            {
+            }
         }
 
         public void SetIsSimulated(bool simulated)
