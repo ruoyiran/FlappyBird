@@ -45,19 +45,17 @@ class UnityEnvironment(object):
         except socket.timeout as e:
             raise socket.error(e.strerror)
 
-    def _recv_bytes(self, buffer_size=0):
+    def _recv_bytes(self):
         try:
-            if buffer_size <= 0:
-                buffer_size = self._buffer_size
-            data = self._conn.recv(buffer_size)
+            data = self._conn.recv(self._buffer_size)
         except Exception as ex:
             raise ex
         return data
 
     def _recv_bytes_except_header(self):
-        s = self._recv_bytes(4)
-        data_length = struct.unpack("I", bytearray(s))[0]
-        s = bytearray()
+        s = self._recv_bytes()
+        data_length = struct.unpack("I", bytearray(s[:4]))[0]
+        s = s[4:]
         while len(s) < data_length:
             s += self._recv_bytes()
         if len(s) > data_length:
@@ -95,7 +93,7 @@ class UnityEnvironment(object):
     def step(self, action):
         action = int(action)
         self._send(CMD_STEP)
-        s = self._recv_bytes(32)
+        s = self._recv_bytes()
         self._send_action(action)
         data_bytes, reward, is_done = self._recv_step_data()
         image_data = np.array(list(data_bytes), dtype=np.int32)
