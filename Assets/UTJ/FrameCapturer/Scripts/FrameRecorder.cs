@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -56,30 +57,59 @@ namespace UTJ.FrameCapturer
         public bool supportVideo { get { return m_encoderConfigs.supportVideo; } }
         public bool supportAudio { get { return m_encoderConfigs.supportAudio; } }
         public RenderTexture scratchBuffer { get { return m_scratchBuffer; } }
+
+        public bool IsCaptured { get; set; }
+        public int CaptureWidth { get { return captureWidth; } }
+        public int CaptureHeight { get { return captureHeight; } }
+        public int captureWidth;
+        public int captureHeight;
+        private bool initialized = false;
         #endregion
 
         protected new void Update()
         {
         }
 
+        private void OnDestroy()
+        {
+            Release();
+        }
+
         public override bool BeginRecording()
         {
             if (m_recording) { return false; }
+            if (!initialized)
+                initialized = Initialize();
+            if (!initialized)
+                return false;
+
+            m_recording = true;
+            IsCaptured = false;
+            return true;
+        }
+
+        private bool Initialize()
+        {
             if (m_shCopy == null)
             {
                 Debug.LogError("FrameRecorder: copy shader is missing!");
                 return false;
             }
+            var cam = GetComponent<Camera>();
             if (m_captureTarget == CaptureTarget.RenderTexture && m_targetRT == null)
             {
-                Debug.LogError("FrameRecorder: target RenderTexture is null!");
-                return false;
+                m_targetRT = cam.targetTexture;
+                if(m_targetRT == null)
+                {
+                    Debug.LogError("FrameRecorder: target RenderTexture is null!");
+                    return false;
+                }
             }
+            m_outputDir.CreateDirectory();
 
             if (m_quad == null) m_quad = fcAPI.CreateFullscreenQuad();
             if (m_matCopy == null) m_matCopy = new Material(m_shCopy);
 
-            var cam = GetComponent<Camera>();
             if (cam.targetTexture != null)
             {
                 m_matCopy.EnableKeyword("OFFSCREEN");
@@ -91,8 +121,8 @@ namespace UTJ.FrameCapturer
 
             // create scratch buffer
             {
-                int captureWidth = cam.pixelWidth;
-                int captureHeight = cam.pixelHeight;
+                captureWidth = cam.pixelWidth;
+                captureHeight = cam.pixelHeight;
                 GetCaptureResolution(ref captureWidth, ref captureHeight);
                 if (m_encoderConfigs.format == MovieEncoder.Type.MP4 ||
                     m_encoderConfigs.format == MovieEncoder.Type.WebM)
@@ -101,7 +131,7 @@ namespace UTJ.FrameCapturer
                     captureHeight = (captureHeight + 1) & ~1;
                 }
 
-                Logger.Print("captureWidth: {0}, captureHeight: {1}", captureWidth, captureHeight);
+                //Logger.Print("captureWidth: {0}, captureHeight: {1}", captureWidth, captureHeight);
                 m_scratchBuffer = new RenderTexture(captureWidth, captureHeight, 0, RenderTextureFormat.ARGB32);
                 m_scratchBuffer.wrapMode = TextureWrapMode.Repeat;
                 m_scratchBuffer.Create();
@@ -115,10 +145,12 @@ namespace UTJ.FrameCapturer
                     targetFramerate = m_targetFramerate;
                 }
 
+                string outPath = m_outputDir.GetFullPath() + "/";
                 m_encoderConfigs.captureVideo = m_captureVideo;
                 m_encoderConfigs.captureAudio = m_captureAudio;
                 m_encoderConfigs.Setup(m_scratchBuffer.width, m_scratchBuffer.height, 3, targetFramerate);
-                m_encoder = MovieEncoder.Create(m_encoderConfigs, "");
+                m_encoder = MovieEncoder.Create(m_encoderConfigs, outPath);
+
                 if (m_encoder == null || !m_encoder.IsValid())
                 {
                     EndRecording();
@@ -148,13 +180,26 @@ namespace UTJ.FrameCapturer
                 }
                 cam.AddCommandBuffer(CameraEvent.AfterEverything, m_cb);
             }
-
             base.BeginRecording();
-            Debug.Log("FrameRecorder: BeginRecording()");
             return true;
         }
 
+        public byte[] GetFrameImageData()
+        {
+            return m_encoder.GetFrameImageData();
+        }
+
+        public string GetFrameImagePath()
+        {
+            return m_encoder.GetFrameImagePath();
+        }
+
         public override void EndRecording()
+        {
+            m_recording = false;
+        }
+
+        private void Release()
         {
             if (m_encoder != null)
             {
@@ -191,9 +236,9 @@ namespace UTJ.FrameCapturer
 
         IEnumerator OnPostRender()
         {
+            yield return new WaitForEndOfFrame();
             if (m_recording && m_encoder != null && Time.frameCount % m_captureEveryNthFrame == 0)
             {
-                yield return new WaitForEndOfFrame();
 
                 double timestamp = Time.unscaledTime - m_initialTime;
                 if (m_framerateMode == FrameRateMode.Constant)
@@ -204,6 +249,7 @@ namespace UTJ.FrameCapturer
                 fcAPI.fcLock(m_scratchBuffer, TextureFormat.RGB24, (data, fmt) =>
                 {
                     m_encoder.AddVideoFrame(data, fmt, timestamp);
+                    IsCaptured = true;
                 });
                 ++m_recordedFrames;
             }

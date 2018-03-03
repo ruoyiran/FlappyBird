@@ -9,7 +9,9 @@ import atexit
 import socket
 import struct
 import json
-from image_utils import process_pixels, normalize
+import numpy as np
+from image_utils import process_pixels
+
 CMD_QUIT  = "QUIT"
 CMD_STEP  = "STEP"
 CMD_RESET = "RESET"
@@ -39,6 +41,7 @@ class UnityEnvironment(object):
             print("Waiting connect...")
             self._socket.listen(1)
             self._conn, _ = self._socket.accept()
+            print("Connected.")
         except socket.timeout as e:
             raise socket.error(e.strerror)
 
@@ -53,9 +56,14 @@ class UnityEnvironment(object):
         s = self._recv_bytes()
         data_length = struct.unpack("I", bytearray(s[:4]))[0]
         s = s[4:]
-        while len(s) != data_length:
+        while len(s) < data_length:
             s += self._recv_bytes()
-        return s
+        if len(s) > data_length:
+            extra = s[data_length:]
+            s = s[:data_length]
+        else:
+            extra = []
+        return s, extra
 
     def _recv(self):
         data = self._recv_bytes()
@@ -78,26 +86,31 @@ class UnityEnvironment(object):
 
     def reset(self):
         self._send(CMD_RESET)
-        image = self._recv_state_image()
-        image = normalize(image)
-        return image
+        # image_path = self._recv_bytes()
+        # image_path = image_path.decode()
+        # return image_path
+        data_bytes, _ = self._recv_bytes_except_header()
+        image_data = np.array(list(data_bytes), dtype=np.int32)
+        return image_data
 
     def step(self, action):
         action = int(action)
         self._send(CMD_STEP)
         self._recv_bytes()
         self._send_action(action)
-        reward, is_done = self._recv_step_json_data()
-        image = self._recv_state_image()
-        image = normalize(image)
-        return image, reward, is_done
+        data_bytes, reward, is_done = self._recv_step_data()
+        image_data = np.array(list(data_bytes), dtype=np.int32)
+        return image_data, reward, is_done
 
-    def _recv_step_json_data(self):
-        json_data = self._recv_bytes_except_header()
+    def _recv_step_data(self):
+        json_data, extra_data = self._recv_bytes_except_header()
         step_msg = json.loads(json_data.decode('utf-8'))
         reward = step_msg["Reward"]
         is_done = step_msg["IsDone"]
-        return reward, is_done
+        image_data, _ = self._recv_bytes_except_header()
+        if extra_data:
+            image_data = extra_data + image_data
+        return image_data, reward, is_done
 
     def _recv_state_image(self):
         image_data = self._recv_bytes_except_header()

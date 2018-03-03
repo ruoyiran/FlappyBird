@@ -13,14 +13,12 @@ import cv2 as cv
 
 def process_pixels(image_bytes=None):
     s = bytearray(image_bytes)
-    image = Image.open(io.BytesIO(s))
-    return np.array(image)
+    # image = Image.open(io.BytesIO(s))
+    return np.array(list(s))
 
 def normalize(image):
     return image/255.0
 
-def show_image(image):
-    # cv.imshow("Image", image)
-    # cv.waitKey()
-    plt.imshow(image)
+def show_image(image, cmap=None):
+    plt.imshow(np.squeeze(image), cmap=cmap)
     plt.show()

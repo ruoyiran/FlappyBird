@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using UnityEngine;
 
 
@@ -130,7 +131,7 @@ namespace UTJ.FrameCapturer
             try
             {
                 var path = GetFullPath();
-                if(path.Length > 0)
+                if(path.Length > 0 && !File.Exists(path))
                 {
                     System.IO.Directory.CreateDirectory(path);
                 }

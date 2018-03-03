@@ -166,9 +166,19 @@ namespace UTJ.FrameCapturer
                 case Type.Gif: ret.Initialize(c.gifEncoderSettings, path); break;
                 case Type.WebM:ret.Initialize(c.webmEncoderSettings,path); break;
                 case Type.MP4: ret.Initialize(c.mp4EncoderSettings, path); break;
-                case Type.Frame: ret.Initialize(c.frameEncoderSettings, ""); break;
+                case Type.Frame: ret.Initialize(c.frameEncoderSettings, path); break;
             }
             return ret;
+        }
+
+        public virtual byte[] GetFrameImageData()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual string GetFrameImagePath()
+        {
+            throw new NotImplementedException();
         }
     }
 }

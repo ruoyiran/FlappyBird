@@ -64,6 +64,7 @@ namespace UTJ.FrameCapturer
         public bool supportVideo { get { return m_encoderConfigs.supportVideo; } }
         public bool supportAudio { get { return m_encoderConfigs.supportAudio; } }
         public RenderTexture scratchBuffer { get { return m_scratchBuffer; } }
+
         #endregion
 
 

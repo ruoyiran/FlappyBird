@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UTJ.FrameCapturer;
 
 namespace FlappyBird
 {
@@ -37,6 +38,7 @@ namespace FlappyBird
 
         public Bird bird;
         public Environment enviroment;
+        public FrameRecorder frameRecorder;
         public GameState CurrentGameState { get { return _gameState; } }
 
         private IPlayMode _playMode;

@@ -2,6 +2,17 @@
 using System.IO;
 
 public class ImageTool {
+
+    public static void BytesToImage(byte[] bytes)
+    {
+        string path = "FrameImage.jpg";
+        FileStream fs = new FileStream(path, FileMode.Create);//注意123.jpg为你的图片名称
+        BinaryWriter bw = new BinaryWriter(fs);
+        bw.Write(bytes, 0, bytes.Length);
+        fs.Flush(); //数据写入图片文件
+        fs.Close();
+    }
+
     public static void SaveTexture2DToFile(Texture2D tex, string path)
     {
         byte[] bytes = tex.EncodeToPNG();

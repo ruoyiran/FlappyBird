@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UTJ.FrameCapturer;
 
 namespace FlappyBird
 {
@@ -6,9 +7,17 @@ namespace FlappyBird
     {
         public Rigidbody2D[] bgRigidbodys;
         public ColumnPool columnPool;
+        public Camera renderCamera;
         private float scrollSpeed = -2f;
         private int _envImageWidth = 84;
         private int _envImageHeight = 84;
+        private RenderTexture renderTexture;
+
+        private void Start()
+        {
+            renderTexture = RenderTexture.GetTemporary(Screen.width/2, Screen.height);
+            renderCamera.targetTexture = renderTexture;
+        }
 
         private void Update()
         {
@@ -29,6 +38,11 @@ namespace FlappyBird
                 default:
                     break;
             }
+        }
+
+        private void OnDestroy()
+        {
+            RenderTexture.ReleaseTemporary(renderTexture);
         }
 
         public void SetScrollSpeed(float speed)

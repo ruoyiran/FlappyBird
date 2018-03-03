@@ -9,8 +9,9 @@
 import numpy as np
 import random
 import tensorflow as tf
+import image_utils
 from unity_environment import UnityEnvironment
-from dqn_network import DeepQNetwork
+from dqn_network import DeepQNetwork, GameConfig
 from tensorflow.python.tools import freeze_graph
 
 class ExperienceBuffer(object):
@@ -52,12 +53,9 @@ def export_graph(sess, model_dir, target_nodes):
                               clear_devices=True, initializer_nodes="", input_saver="",
                               restore_op_name="save/restore_all", filename_tensor_name="save/Const:0")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tf.reset_default_graph()
     env = UnityEnvironment()
-
-    load_model = False  # Whether to load a saved model.
-    input_size = 84 * 84 * 3
     h_size = 512
     learning_rate = 0.0001
     n_actions = 2
@@ -82,7 +80,7 @@ if __name__ == '__main__':
     saver = tf.train.Saver()
     path = "./dqn"  # The path to save our model to.
     with tf.Session() as sess:
-        if False:
+        if True:
             writer = tf.summary.FileWriter(logdir="../log", graph=sess.graph)
             writer.close()
         sess.run(tf.global_variables_initializer())
@@ -100,14 +98,14 @@ if __name__ == '__main__':
             #     print("Action:", a)
             #     cv.imshow("Image", s1)
             #     cv.waitKey()
-            experience_buffer.add(np.reshape(np.array([s.reshape([input_size]), a, r, s1.reshape([input_size]), d]), [1, 5]))
+            experience_buffer.add(
+                np.reshape(np.array([s, a, r, s1, d]), [1, 5]))
             if step > pre_train_steps:
                 if e > end_e:
                     e -= step_drop_e
                 if step % update_freq == 0:
                     train_batch = experience_buffer.sample(batch_size)
-                    inputs = np.reshape(np.vstack(train_batch[:, 3]),
-                                        [-1, 84, 84, 3])
+                    inputs = np.vstack(train_batch[:, 3])
                     A = sess.run(mainQN.predict, feed_dict={
                         mainQN.input_x: inputs
                     })
@@ -117,8 +115,7 @@ if __name__ == '__main__':
                     doubleQ = Q[range(batch_size), A]
                     targetQ = train_batch[:, 2] + y * doubleQ
 
-                    inputs = np.reshape(np.vstack(train_batch[:, 0]),
-                                        [-1, 84, 84, 3])
+                    inputs = np.vstack(train_batch[:, 0])
                     _, loss_val = sess.run([mainQN.update_model, mainQN.loss], feed_dict={
                         mainQN.input_x: inputs,
                         mainQN.actions: train_batch[:, 1],
@@ -138,3 +135,5 @@ if __name__ == '__main__':
             #     export_graph(sess, path, target_nodes="MainQNetwork/Qout/QValue")
         export_graph(sess, path, target_nodes="MainQNetwork/Qout/QValue")
         print("Training finished.")
+
+    env.close()

@@ -7,12 +7,23 @@
 """
 import tensorflow as tf
 
+class GameConfig(object):
+    image_height = 768
+    image_width = 683
+    n_channels = 3
+    target_size = 84
+
 class DeepQNetwork(object):
 
     def __init__(self, h_size=512, n_actions=4, learning_rate=1e-4):
         with tf.name_scope("Input"):
-            input_x = tf.placeholder(dtype=tf.float32, shape=[None, 84, 84, 3], name="X")
-        conv1 = tf.layers.conv2d(input_x, filters=32, kernel_size=8, strides=4,
+            input_x = tf.placeholder(dtype=tf.int32, shape=(None, GameConfig.image_height * GameConfig.image_width * GameConfig.n_channels))
+        with tf.name_scope("ImagePreporcess"):
+            x_reshape = tf.reshape(input_x, shape=(-1, GameConfig.image_height, GameConfig.image_width, GameConfig.n_channels))
+            # x_gray = tf.image.rgb_to_grayscale(x_reshape)
+            x = tf.image.resize_bilinear(x_reshape, (GameConfig.target_size, GameConfig.target_size))
+            x = tf.div(tf.cast(x, tf.float32), 255.0)
+        conv1 = tf.layers.conv2d(x, filters=32, kernel_size=8, strides=4,
                                  padding='valid', activation=tf.nn.relu, name="Conv1")
         conv2 = tf.layers.conv2d(conv1, filters=64, kernel_size=4, strides=2,
                                  padding='valid', activation=tf.nn.relu, name="Conv2")

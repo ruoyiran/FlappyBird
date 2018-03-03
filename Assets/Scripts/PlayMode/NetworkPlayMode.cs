@@ -8,6 +8,9 @@ namespace FlappyBird
 {
     public class NetworkPlayMode : BasePlayMode, IPlayMode
     {
+        private delegate void CaptureFrameDoneHandler(string imagePath);
+        private delegate void CaptureFrameDataDoneHandler(byte[] imageData, string imagePath);
+
         private Communicator _communicator;
         private string _ipAddress = "127.0.0.1";
         private int _port = 8008;
@@ -117,20 +120,30 @@ namespace FlappyBird
         private void Reset()
         {
             GameManager.Instance.ResetGame();
-            SendDataBytesToServer(GameManager.Instance.enviroment.GetEnvironmentImageBytes());
+            StartCoroutine(CaptureFrame((imageData, imagePath) => {
+                SendDataBytesToServer(Algorithm.AppendLength(imageData));
+            }));
         }
 
         private void Step()
         {
             NotifyServerDataReceived();
             ExecStepAction();
-            StartCoroutine(DelaySendEnvronmentStateToServer());
+            StartCoroutine(CaptureFrame((imageData, imagePath) => { SendEnvronmentStateToServer(imageData, imagePath); }));
         }
 
-        private IEnumerator DelaySendEnvronmentStateToServer()
+        private IEnumerator CaptureFrame(CaptureFrameDataDoneHandler doneHandler)
         {
-            yield return new UnityEngine.WaitForEndOfFrame();
-            SendEnvronmentStateToServer();
+            GameManager.Instance.frameRecorder.BeginRecording();
+            while (!GameManager.Instance.frameRecorder.IsCaptured)
+            {
+                yield return null;
+            }
+            string imagePath = GameManager.Instance.frameRecorder.GetFrameImagePath();
+            byte[] imageData = GameManager.Instance.frameRecorder.GetFrameImageData();
+            if (doneHandler != null)
+                doneHandler(imageData, imagePath);
+            GameManager.Instance.frameRecorder.EndRecording();
         }
 
         private void ExecStepAction()
@@ -141,14 +154,15 @@ namespace FlappyBird
             GameManager.Instance.bird.Flap(action);
         }
 
-        private void SendEnvronmentStateToServer()
+        private void SendEnvronmentStateToServer(byte[] imageData, string imagePath)
         {
             AgentStepMessage stepMsg = new AgentStepMessage();
             stepMsg.IsDone = GameManager.Instance.bird.IsDead;
             stepMsg.Reward = GetReward();
+            stepMsg.ImagePath = imagePath;
             string stepData = JsonConvert.SerializeObject(stepMsg, Formatting.Indented);
-            SendDataBytesToServer(Encoding.ASCII.GetBytes(stepData));
-            SendDataBytesToServer(GameManager.Instance.enviroment.GetEnvironmentImageBytes());
+            SendDataBytesToServer(Algorithm.AppendLength(Encoding.ASCII.GetBytes(stepData)));
+            SendDataBytesToServer(Algorithm.AppendLength(imageData));
         }
 
         private float GetReward()
@@ -162,8 +176,7 @@ namespace FlappyBird
 
         private void SendDataBytesToServer(byte[] data)
         {
-            byte[] bytes = Algorithm.AppendLength(data);
-            _communicator.SendToServer(bytes);
+            _communicator.SendToServer(data);
         }
 
         private void NotifyServerDataReceived()

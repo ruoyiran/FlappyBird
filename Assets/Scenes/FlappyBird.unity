@@ -121,7 +121,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 26225663}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Backgrounds
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -154,7 +154,6 @@ GameObject:
   - component: {fileID: 31870214}
   - component: {fileID: 31870213}
   - component: {fileID: 31870212}
-  - component: {fileID: 31870216}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -225,103 +224,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &31870216
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 31870211}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4faaa481d6f6f7c49b78d7f0729d1538, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_outputDir:
-    m_root: 1
-    m_leaf: Capture
-    m_readOnly: 0
-  m_resolution: 0
-  m_resolutionPercent: 100
-  m_resolutionWidth: 1920
-  m_framerateMode: 1
-  m_targetFramerate: 30
-  m_fixDeltaTime: 1
-  m_waitDeltaTime: 1
-  m_captureEveryNthFrame: 1
-  m_captureControl: 0
-  m_startFrame: 0
-  m_endFrame: 100
-  m_startTime: 0
-  m_endTime: 10
-  m_recordOnStart: 0
-  m_encoderConfigs:
-    format: 5
-    pngEncoderSettings:
-      pixelFormat: 0
-      maxTasks: 2
-      width: 0
-      height: 0
-      channels: 0
-    exrEncoderSettings:
-      pixelFormat: 0
-      compression: 3
-      maxTasks: 2
-      width: 0
-      height: 0
-      channels: 0
-    gifEncoderSettings:
-      width: 0
-      height: 0
-      numColors: 256
-      keyframeInterval: 30
-      maxTasks: 8
-    webmEncoderSettings:
-      video:
-        v: 1
-      videoEncoder: 0
-      videoWidth: 0
-      videoHeight: 0
-      videoTargetFramerate: 60
-      videoBitrateMode: 1
-      videoTargetBitrate: 1024000
-      videoMaxTasks: 4
-      audio:
-        v: 1
-      audioEncoder: 0
-      audioSampleRate: 48000
-      audioNumChannels: 2
-      audioBitrateMode: 1
-      audioTargetBitrate: 128000
-      audioMaxTasks: 4
-    mp4EncoderSettings:
-      video:
-        v: 1
-      videoWidth: 0
-      videoHeight: 0
-      videoTargetFramerate: 30
-      videoBitrateMode: 1
-      videoTargetBitrate: 1024000
-      videoFlags: 62
-      videoMaxTasks: 4
-      audio:
-        v: 1
-      audioSampleRate: 48000
-      audioNumChannels: 2
-      audioBitrateMode: 1
-      audioTargetBitrate: 128000
-      audioFlags: 6
-      audioMaxTasks: 4
-    frameEncoderSettings:
-      pixelFormat: 0
-      maxTasks: 2
-      width: 0
-      height: 0
-      channels: 0
-  m_captureTarget: 0
-  m_targetRT: {fileID: 0}
-  m_captureVideo: 1
-  m_captureAudio: 0
-  m_shCopy: {fileID: 4800000, guid: 2283fb92223c7914c9096670e29202c8, type: 3}
 --- !u!1 &58177099
 GameObject:
   m_ObjectHideFlags: 0
@@ -403,7 +305,7 @@ GameObject:
   - component: {fileID: 110101329}
   - component: {fileID: 110101330}
   - component: {fileID: 110101331}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SkyBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -496,7 +398,7 @@ GameObject:
   m_Component:
   - component: {fileID: 127191147}
   - component: {fileID: 127191148}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Environment
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -515,6 +417,8 @@ Transform:
   m_Children:
   - {fileID: 26225663}
   - {fileID: 1653720815}
+  - {fileID: 128939129}
+  - {fileID: 153952093}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -533,6 +437,7 @@ MonoBehaviour:
   - {fileID: 2025302931}
   - {fileID: 1073738524}
   columnPool: {fileID: 1653720816}
+  renderCamera: {fileID: 153952096}
 --- !u!1 &128939127
 GameObject:
   m_ObjectHideFlags: 0
@@ -546,7 +451,7 @@ GameObject:
   - component: {fileID: 128939131}
   - component: {fileID: 128939132}
   - component: {fileID: 128939133}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Bird
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -603,12 +508,12 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 128939127}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_Father: {fileID: 127191147}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!50 &128939130
 Rigidbody2D:
@@ -697,6 +602,171 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 36bf1cb0f85f7fe40ae2add760979a95, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &153952092
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 153952093}
+  - component: {fileID: 153952096}
+  - component: {fileID: 153952094}
+  m_Layer: 8
+  m_Name: RenderCamera
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &153952093
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 153952092}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.08, y: 0, z: -10}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 127191147}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &153952094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 153952092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4faaa481d6f6f7c49b78d7f0729d1538, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_outputDir:
+    m_root: 4
+    m_leaf: Capture
+    m_readOnly: 0
+  m_resolution: 0
+  m_resolutionPercent: 100
+  m_resolutionWidth: 1920
+  m_framerateMode: 1
+  m_targetFramerate: 30
+  m_fixDeltaTime: 1
+  m_waitDeltaTime: 1
+  m_captureEveryNthFrame: 1
+  m_captureControl: 0
+  m_startFrame: 0
+  m_endFrame: 100
+  m_startTime: 0
+  m_endTime: 10
+  m_recordOnStart: 0
+  m_encoderConfigs:
+    format: 5
+    pngEncoderSettings:
+      pixelFormat: 0
+      maxTasks: 2
+      width: 0
+      height: 0
+      channels: 0
+    exrEncoderSettings:
+      pixelFormat: 0
+      compression: 3
+      maxTasks: 2
+      width: 0
+      height: 0
+      channels: 0
+    gifEncoderSettings:
+      width: 0
+      height: 0
+      numColors: 256
+      keyframeInterval: 30
+      maxTasks: 8
+    webmEncoderSettings:
+      video:
+        v: 1
+      videoEncoder: 0
+      videoWidth: 0
+      videoHeight: 0
+      videoTargetFramerate: 60
+      videoBitrateMode: 1
+      videoTargetBitrate: 1024000
+      videoMaxTasks: 4
+      audio:
+        v: 1
+      audioEncoder: 0
+      audioSampleRate: 48000
+      audioNumChannels: 2
+      audioBitrateMode: 1
+      audioTargetBitrate: 128000
+      audioMaxTasks: 4
+    mp4EncoderSettings:
+      video:
+        v: 1
+      videoWidth: 0
+      videoHeight: 0
+      videoTargetFramerate: 30
+      videoBitrateMode: 1
+      videoTargetBitrate: 1024000
+      videoFlags: 62
+      videoMaxTasks: 4
+      audio:
+        v: 1
+      audioSampleRate: 48000
+      audioNumChannels: 2
+      audioBitrateMode: 1
+      audioTargetBitrate: 128000
+      audioFlags: 6
+      audioMaxTasks: 4
+    frameEncoderSettings:
+      pixelFormat: 0
+      maxTasks: 2
+      width: 0
+      height: 0
+      channels: 0
+  m_captureTarget: 1
+  m_targetRT: {fileID: 0}
+  m_captureVideo: 1
+  m_captureAudio: 0
+  m_shCopy: {fileID: 4800000, guid: 2283fb92223c7914c9096670e29202c8, type: 3}
+  captureWidth: 0
+  captureHeight: 0
+--- !u!20 &153952096
+Camera:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 153952092}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: -0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.3
+  far clip plane: 1000
+  field of view: 60
+  orthographic: 1
+  orthographic size: 5
+  m_Depth: 0
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 256
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
 --- !u!224 &160351232
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1083,7 +1153,7 @@ GameObject:
   - component: {fileID: 464114043}
   - component: {fileID: 464114042}
   - component: {fileID: 464114041}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SkyBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1177,7 +1247,7 @@ GameObject:
   - component: {fileID: 628124539}
   - component: {fileID: 628124541}
   - component: {fileID: 628124540}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ColumnSpriteUp
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2305,7 +2375,7 @@ GameObject:
   - component: {fileID: 1073738523}
   - component: {fileID: 1073738524}
   - component: {fileID: 1073738525}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Background2
   m_TagString: Background
   m_Icon: {fileID: 0}
@@ -2700,6 +2770,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bird: {fileID: 128939133}
   enviroment: {fileID: 127191148}
+  frameRecorder: {fileID: 153952094}
 --- !u!1 &1376293527
 GameObject:
   m_ObjectHideFlags: 0
@@ -3434,7 +3505,7 @@ GameObject:
   - component: {fileID: 1619324612}
   - component: {fileID: 1619324613}
   - component: {fileID: 1619324614}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Columns
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3522,7 +3593,7 @@ GameObject:
   - component: {fileID: 1623575335}
   - component: {fileID: 1623575336}
   - component: {fileID: 1623575337}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ColumnSpriteDown
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3620,7 +3691,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1653720815}
   - component: {fileID: 1653720816}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: ColumnPool
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3916,7 +3987,7 @@ GameObject:
   - component: {fileID: 2025302932}
   - component: {fileID: 2025302931}
   - component: {fileID: 2025302934}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Background1
   m_TagString: Background
   m_Icon: {fileID: 0}
