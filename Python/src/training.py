@@ -11,8 +11,10 @@ import random
 import tensorflow as tf
 import image_utils
 from unity_environment import UnityEnvironment
-from dqn_network import DeepQNetwork, GameConfig
+from dqn_network import DeepQNetwork
+from data_preprocessing import DataPrerocessing
 from tensorflow.python.tools import freeze_graph
+from game_config import GameConfig
 
 class ExperienceBuffer(object):
     def __init__(self, buffer_size=50000):
@@ -66,6 +68,7 @@ if __name__ == "__main__":
     pre_train_steps = 10000
     total_steps = 1000000
     anneling_steps = 10000.
+    input_size = GameConfig.target_size * GameConfig.target_size * GameConfig.n_channels
     start_e = 1
     end_e = 0.1
     e = start_e
@@ -79,6 +82,7 @@ if __name__ == "__main__":
     y = 0.99
     saver = tf.train.Saver()
     path = "./dqn"  # The path to save our model to.
+    dp = DataPrerocessing()
     with tf.Session() as sess:
         if True:
             writer = tf.summary.FileWriter(logdir="../log", graph=sess.graph)
@@ -86,6 +90,7 @@ if __name__ == "__main__":
         sess.run(tf.global_variables_initializer())
         update_target(targetOps, sess)
         s = env.reset()
+        s = dp.run(sess, s)
         rList = []
         for step in range(total_steps + 1):
             if step <= pre_train_steps or np.random.rand(1) < e:
@@ -93,19 +98,22 @@ if __name__ == "__main__":
             else:
                 a = sess.run(mainQN.predict, feed_dict={mainQN.input_x: [s]})[0]
             s1, r, d = env.step(a)
+            s1 = dp.run(sess, s1)
             rList.append(r)
             # if len(rList) > 25 and np.mean(rList[-25:]) > 20:
             #     print("Action:", a)
             #     cv.imshow("Image", s1)
             #     cv.waitKey()
             experience_buffer.add(
-                np.reshape(np.array([s, a, r, s1, d]), [1, 5]))
+                np.reshape(np.array([s.reshape([input_size]), a, r, s1.reshape([input_size]), d]), [1, 5]))
+
             if step > pre_train_steps:
                 if e > end_e:
                     e -= step_drop_e
                 if step % update_freq == 0:
                     train_batch = experience_buffer.sample(batch_size)
-                    inputs = np.vstack(train_batch[:, 3])
+                    inputs = np.reshape(np.vstack(train_batch[:, 3]),
+                                        [-1, GameConfig.target_size, GameConfig.target_size, GameConfig.n_channels])
                     A = sess.run(mainQN.predict, feed_dict={
                         mainQN.input_x: inputs
                     })
@@ -115,7 +123,8 @@ if __name__ == "__main__":
                     doubleQ = Q[range(batch_size), A]
                     targetQ = train_batch[:, 2] + y * doubleQ
 
-                    inputs = np.vstack(train_batch[:, 0])
+                    inputs = np.reshape(np.vstack(train_batch[:, 0]),
+                                        [-1, GameConfig.target_size, GameConfig.target_size, GameConfig.n_channels])
                     _, loss_val = sess.run([mainQN.update_model, mainQN.loss], feed_dict={
                         mainQN.input_x: inputs,
                         mainQN.actions: train_batch[:, 1],
@@ -124,6 +133,7 @@ if __name__ == "__main__":
             s = s1
             if d is True:
                 s = env.reset()
+                s = dp.run(sess, s)
             if step > 0 and step % 25 == 0:
                 print("step: {}, average reward of last 25 episodes {}, e: {}".format(step, np.mean(rList), e))
                 rList = []

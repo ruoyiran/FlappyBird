@@ -6,23 +6,14 @@
 @time: 2018/1/6
 """
 import tensorflow as tf
-
-class GameConfig(object):
-    image_height = 768
-    image_width = 683
-    n_channels = 3
-    target_size = 84
+from game_config import GameConfig
 
 class DeepQNetwork(object):
 
     def __init__(self, h_size=512, n_actions=4, learning_rate=1e-4):
         with tf.name_scope("Input"):
-            input_x = tf.placeholder(dtype=tf.int32, shape=(None, GameConfig.image_height * GameConfig.image_width * GameConfig.n_channels))
-        with tf.name_scope("ImagePreporcess"):
-            x_reshape = tf.reshape(input_x, shape=(-1, GameConfig.image_height, GameConfig.image_width, GameConfig.n_channels))
-            # x_gray = tf.image.rgb_to_grayscale(x_reshape)
-            x = tf.image.resize_bilinear(x_reshape, (GameConfig.target_size, GameConfig.target_size))
-            x = tf.div(tf.cast(x, tf.float32), 255.0)
+            x = tf.placeholder(tf.float32, shape=(None, GameConfig.target_size, GameConfig.target_size, GameConfig.n_channels), name="x")
+
         conv1 = tf.layers.conv2d(x, filters=32, kernel_size=8, strides=4,
                                  padding='valid', activation=tf.nn.relu, name="Conv1")
         conv2 = tf.layers.conv2d(conv1, filters=64, kernel_size=4, strides=2,
@@ -58,7 +49,7 @@ class DeepQNetwork(object):
             trainer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         update_model = trainer.minimize(loss)
 
-        self.input_x = input_x
+        self.input_x = x
         self.predict = predict
         self.loss = loss
         self.Qout = Qout
