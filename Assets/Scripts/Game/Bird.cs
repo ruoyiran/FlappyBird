@@ -52,6 +52,8 @@ namespace FlappyBird
         {
             if (action == Action.Flap)
                 Flap();
+            else if (action == Action.Idle)
+                _rb2d.velocity = Vector2.zero;
         }
 
         public void SetIsSimulated(bool simulated)
