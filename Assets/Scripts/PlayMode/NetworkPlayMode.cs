@@ -9,7 +9,7 @@ namespace FlappyBird
     public class NetworkPlayMode : BasePlayMode, IPlayMode
     {
         private delegate void CaptureFrameDoneHandler(string imagePath);
-        private delegate void CaptureFrameDataDoneHandler(byte[] imageData, string imagePath);
+        private delegate void CaptureFrameDataDoneHandler(byte[] imageData);
 
         private Communicator _communicator;
         private string _ipAddress = "127.0.0.1";
@@ -120,7 +120,7 @@ namespace FlappyBird
         private void Reset()
         {
             GameManager.Instance.ResetGame();
-            StartCoroutine(CaptureFrame((imageData, imagePath) => {
+            StartCoroutine(CaptureFrame((imageData) => {
                 SendDataBytesToServer(Algorithm.AppendLength(imageData));
             }));
         }
@@ -129,7 +129,7 @@ namespace FlappyBird
         {
             NotifyServerDataReceived();
             ExecStepAction();
-            StartCoroutine(CaptureFrame((imageData, imagePath) => { SendEnvronmentStateToServer(imageData, imagePath); }));
+            StartCoroutine(CaptureFrame((imageData) => { SendEnvronmentStateToServer(imageData); }));
         }
 
         private IEnumerator CaptureFrame(CaptureFrameDataDoneHandler doneHandler)
@@ -139,10 +139,9 @@ namespace FlappyBird
             {
                 yield return null;
             }
-            string imagePath = GameManager.Instance.frameRecorder.GetFrameImagePath();
             byte[] imageData = GameManager.Instance.frameRecorder.GetFrameImageData();
             if (doneHandler != null)
-                doneHandler(imageData, imagePath);
+                doneHandler(imageData);
             GameManager.Instance.frameRecorder.EndRecording();
         }
 
@@ -154,12 +153,11 @@ namespace FlappyBird
             GameManager.Instance.bird.Flap(action);
         }
 
-        private void SendEnvronmentStateToServer(byte[] imageData, string imagePath)
+        private void SendEnvronmentStateToServer(byte[] imageData)
         {
             AgentStepMessage stepMsg = new AgentStepMessage();
             stepMsg.IsDone = GameManager.Instance.bird.IsDead;
             stepMsg.Reward = GetReward();
-            stepMsg.ImagePath = imagePath;
             string stepData = JsonConvert.SerializeObject(stepMsg, Formatting.Indented);
             SendDataBytesToServer(Algorithm.AppendLength(Encoding.ASCII.GetBytes(stepData)));
             SendDataBytesToServer(Algorithm.AppendLength(imageData));
