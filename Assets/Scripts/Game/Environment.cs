@@ -9,13 +9,13 @@ namespace FlappyBird
         public ColumnPool columnPool;
         public Camera renderCamera;
         private float scrollSpeed = -2f;
-        private int _envImageWidth = 84;
-        private int _envImageHeight = 84;
+        private int _envImageWidth = 683;
+        private int _envImageHeight = 768;
         private RenderTexture renderTexture;
 
         private void Start()
         {
-            renderTexture = RenderTexture.GetTemporary(Screen.width/2, Screen.height);
+            renderTexture = RenderTexture.GetTemporary(_envImageWidth, _envImageHeight);
             renderCamera.targetTexture = renderTexture;
         }
 
