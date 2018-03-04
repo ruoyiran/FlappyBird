@@ -5,9 +5,9 @@ namespace FlappyBird
     public class ColumnPool : MonoBehaviour
     {
         public GameObject firstColumnObj;
-        private float maxColumnGapY = 1.5f;
+        private float maxColumnGapY = 1.0f;
         private float spaceX = 5f;
-        private float columnMinY = -4.5f;
+        private float columnMinY = -4.0f;
         private float columnMaxY = -1.5f;
         private int maxColumns = 6;
         private GameObject[] columnObjs;

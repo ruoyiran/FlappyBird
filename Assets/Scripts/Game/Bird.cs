@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace FlappyBird
 {
@@ -12,28 +13,25 @@ namespace FlappyBird
         public bool IsDead { get; set; }
         public bool BetweenInColums { get; set; }
         public int Score { get; set; }
-        public bool IsTop {
-            get {
-                if (_rb2d == null)
-                    return true;
-                return _rb2d.velocity.y < 0;
-            }
-        }
-        private Rigidbody2D _rb2d;
+        public bool IsTop { get; set; }
         private Animator _animator;
         private Vector3 _initPos;
         private Quaternion _initRotation;
         private float _flapForce = 3f;
         private float _gravityScale = 1f;
         private float _topBoundY = 0;
+        private float _bottomBoundY = -2.3f;
 
+        private float birdVelY = 0;    // bird's velocity along Y, default same as birdFlapped
+        private float birdMaxVelY = 1f; // max vel along Y, max descend speed
+        private float birdAccY = 0.01f;   // birds downward accleration
+        private float birdFlapAcc = -0.12f;   // birds speed on flapping
+        private bool birdFlapped = false;
         private void Awake()
         {
-            _rb2d = GetComponent<Rigidbody2D>();
             _animator = GetComponent<Animator>();
             _initPos = transform.position;
             _initRotation = transform.rotation;
-            _rb2d.gravityScale = _gravityScale;
             _topBoundY = Camera.main.orthographicSize;
             IsDead = false;
             BetweenInColums = false;
@@ -45,12 +43,45 @@ namespace FlappyBird
             {
                 transform.position = new Vector3(transform.position.x, _topBoundY, transform.position.z);
             }
+            else if(transform.position.y <= _bottomBoundY)
+            {
+                transform.position = new Vector3(transform.position.x, _bottomBoundY, transform.position.z);
+                _animator.Play("Die");
+                IsDead = true;
+            }
+        }
+
+        private void UpdateBirdPosY()
+        {
+            transform.position += Vector3.down * birdVelY;
+        }
+
+        private float GetBirdVelY()
+        {
+            return transform.position.y;
+        }
+
+        private void FixedUpdate()
+        {
+            if (GameManager.Instance.CurrentGameState == GameState.Playing)
+            {
+                if (birdFlapped)
+                    birdVelY = birdFlapAcc;
+                if (birdVelY < birdMaxVelY && !birdFlapped)
+                {
+                    birdVelY += birdAccY;
+                }
+                if (birdFlapped)
+                    birdFlapped = false;
+                UpdateBirdPosY();
+                IsTop = true;
+            }
         }
 
         public void Flap()
         {
-            _rb2d.velocity = Vector2.zero;
-            _rb2d.AddForce(_flapForce * Vector2.up * Time.deltaTime * 1000);
+            IsTop = false;
+            birdFlapped = true;
             _animator.SetTrigger("Flap");
         }
 
@@ -65,7 +96,6 @@ namespace FlappyBird
 
         public void SetIsSimulated(bool simulated)
         {
-            _rb2d.simulated = simulated;
         }
 
         public void SetFlapForce(float flapForce)
@@ -76,30 +106,50 @@ namespace FlappyBird
         public void SetGravity(float gravity)
         {
             _gravityScale = gravity;
-            _rb2d.gravityScale = _gravityScale;
         }
 
-        private void OnCollisionEnter2D(Collision2D collision)
+        private void OnTriggerEnter2D(Collider2D collision)
+        {
+            if(collision.tag == "Gap")
+            {
+                Score += 1;
+                BetweenInColums = true;
+            }
+            else
+            {
+                BirdDead();
+            }
+        }
+
+        private void OnTriggerExit2D(Collider2D collision)
+        {
+            if (collision.tag == "Gap")
+            {
+                BetweenInColums = false;
+            }
+        }
+
+        private void OnTriggerStay2D(Collider2D collision)
+        {
+            if (collision.tag == "Gap")
+            {
+                BetweenInColums = true;
+            }
+        }
+
+        private void BirdDead()
         {
             _animator.Play("Die");
-            _rb2d.velocity = Vector2.zero;
-            IsDead = true;
             BetweenInColums = false;
-            StartCoroutine(StopFlying());
-        }
-
-        private System.Collections.IEnumerator StopFlying()
-        {
-            yield return null;
-            _rb2d.velocity = Vector2.zero;
+            IsDead = true;
         }
 
         public void Reset()
         {
+            birdVelY = 0;    // bird's velocity along Y, default same as birdFlapped
+            birdFlapped = false;
             IsDead = false;
             Score = 0;
-            _rb2d.velocity = Vector2.zero;
-            _rb2d.gravityScale = _gravityScale;
             transform.position = _initPos;
             transform.rotation = _initRotation;
             _animator.Play("Idle");

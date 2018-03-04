@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿//#define FRAME_TEST
+using UnityEngine;
 
 namespace UTJ.FrameCapturer
 {

@@ -22,14 +22,13 @@ class DeepQNetwork(object):
                                  padding='valid', activation=tf.nn.relu, name="Conv3")
         conv4 = tf.layers.conv2d(conv3, filters=h_size, kernel_size=7, strides=1,
                                  padding='valid', activation=tf.nn.relu, name="Conv4")
-
         # We take the output from the final convolutional layer and split it into separate advantage and value streams.
         streamAC, streamVC = tf.split(conv4, 2, 3)
         streamA = tf.layers.flatten(streamAC, "streamA")
         streamV = tf.layers.flatten(streamVC, name="streamV")
-
         Advantage = tf.layers.dense(streamA, units=n_actions, name="Advantage")
         Value = tf.layers.dense(streamV, units=1, name="Value")
+
         with tf.variable_scope("Qout"):
             Qout = tf.add(Value, tf.subtract(Advantage, tf.reduce_mean(Advantage, axis=1, keepdims=True)), name="QValue")
             predict = tf.argmax(Qout, 1, name="Predict")
@@ -49,6 +48,18 @@ class DeepQNetwork(object):
             trainer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         update_model = trainer.minimize(loss)
 
+        print("x", x.get_shape())
+        print("conv1", conv1.get_shape())
+        print("conv2", conv2.get_shape())
+        print("conv3", conv3.get_shape())
+        print("conv4", conv4.get_shape())
+        print("streamAC", streamAC.get_shape())
+        print("streamVC", streamVC.get_shape())
+        print("streamA", streamA.get_shape())
+        print("streamV", streamV.get_shape())
+        print("Advantage", Advantage.get_shape())
+        print("Value", Value.get_shape())
+
         self.input_x = x
         self.predict = predict
         self.loss = loss
@@ -56,3 +67,5 @@ class DeepQNetwork(object):
         self.targetQ = targetQ
         self.actions = actions
         self.update_model = update_model
+
+DeepQNetwork(512, 2)
