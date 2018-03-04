@@ -23,7 +23,7 @@ GAMMA = 0.99 # decay rate of past observations
 OBSERVE = 100000. # timesteps to observe before training
 EXPLORE = 2000000. # frames over which to anneal epsilon
 FINAL_EPSILON = 0.0001 # final value of epsilon
-INITIAL_EPSILON = 0.0001 # starting value of epsilon
+INITIAL_EPSILON = 1.0 # starting value of epsilon
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
 FRAME_PER_ACTION = 1
@@ -93,12 +93,9 @@ def trainNetwork(s, readout, h_fc1, sess):
     # open up a game state to communicate with emulator
     game_state = UnityEnvironment()
 
+
     # store the previous observations in replay memory
     D = deque()
-
-    # printing
-    a_file = open("logs_" + GAME + "/readout.txt", 'w')
-    h_file = open("logs_" + GAME + "/hidden.txt", 'w')
 
     image_width = 80
     GameConfig.target_size = image_width
@@ -107,14 +104,14 @@ def trainNetwork(s, readout, h_fc1, sess):
     do_nothing[0] = 1
     x_t = game_state.reset()
     dp = DataPrerocessing()
-    x_t = dp.run(sess, x_t)
-    x_t = np.mean(x_t, -1)
-    ret, x_t = cv2.threshold(x_t,1,255,cv2.THRESH_BINARY)
+
+    threshold_val = 170
+    x_t = dp.resize_and_threshold(sess, x_t, threshold_val)
     s_t = np.stack((x_t, x_t, x_t, x_t), axis=2)
 
     # saving and loading networks
     saver = tf.train.Saver()
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
     checkpoint = tf.train.get_checkpoint_state("saved_networks")
     # if checkpoint and checkpoint.model_checkpoint_path:
     #     saver.restore(sess, checkpoint.model_checkpoint_path)
@@ -146,10 +143,10 @@ def trainNetwork(s, readout, h_fc1, sess):
             epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
 
         # run the selected action and observe next state and reward
-        x_t1_colored, r_t, terminal = game_state.frame_step(a_t)
-        x_t1 = cv2.cvtColor(cv2.resize(x_t1_colored, (80, 80)), cv2.COLOR_BGR2GRAY)
-        ret, x_t1 = cv2.threshold(x_t1, 1, 255, cv2.THRESH_BINARY)
-        x_t1 = np.reshape(x_t1, (80, 80, 1))
+        x_t1_colored, r_t, terminal = game_state.step(action_index)
+        x_t1 = dp.resize_and_threshold(sess, x_t1_colored, threshold_val)
+        x_t1 = np.expand_dims(x_t1, axis=2)
+
         #s_t1 = np.append(x_t1, s_t[:,:,1:], axis = 2)
         s_t1 = np.append(x_t1, s_t[:, :, :3], axis=2)
 
@@ -188,6 +185,13 @@ def trainNetwork(s, readout, h_fc1, sess):
 
         # update the old values
         s_t = s_t1
+
+        if terminal:
+            s_t = game_state.reset()
+            s_t = dp.resize_and_threshold(sess, s_t, threshold_val)
+            x_t1 = np.expand_dims(s_t, axis=2)
+            s_t = np.append(x_t1, s_t1[:, :, :3], axis=2)
+
         t += 1
 
         # save progress every 10000 iterations

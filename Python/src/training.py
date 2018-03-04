@@ -90,7 +90,7 @@ if __name__ == "__main__":
         sess.run(tf.global_variables_initializer())
         update_target(targetOps, sess)
         s = env.reset()
-        s = dp.run(sess, s)
+        s = dp.resize_and_normalize(sess, s)
         rList = []
         for step in range(total_steps + 1):
             if step <= pre_train_steps or np.random.rand(1) < e:
@@ -98,7 +98,7 @@ if __name__ == "__main__":
             else:
                 a = sess.run(mainQN.predict, feed_dict={mainQN.input_x: [s]})[0]
             s1, r, d = env.step(a)
-            s1 = dp.run(sess, s1)
+            s1 = dp.resize_and_normalize(sess, s1)
             rList.append(r)
             # if len(rList) > 25 and np.mean(rList[-25:]) > 20:
             #     print("Action:", a)
@@ -133,7 +133,7 @@ if __name__ == "__main__":
             s = s1
             if d is True:
                 s = env.reset()
-                s = dp.run(sess, s)
+                s = dp.resize_and_normalize(sess, s)
             if step > 0 and step % 25 == 0:
                 print("step: {}, average reward of last 25 episodes {}, e: {}".format(step, np.mean(rList), e))
                 rList = []
