@@ -2,7 +2,7 @@
 @version: 1.0
 @author: Roy
 @contact: iranpeng@gmail.com
-@file: grid_world_training.py
+@file: double_dueling_dqn_training.py.py
 @time: 2018/1/7
 """
 
@@ -11,7 +11,7 @@ import random
 import tensorflow as tf
 import image_utils
 from unity_environment import UnityEnvironment
-from dqn_network import DeepQNetwork
+from double_dueling_dqn import DeepQNetwork
 from data_preprocessing import DataPrerocessing
 from tensorflow.python.tools import freeze_graph
 from game_config import GameConfig
@@ -56,8 +56,9 @@ def export_graph(sess, model_dir, target_nodes):
                               restore_op_name="save/restore_all", filename_tensor_name="save/Const:0")
 
 if __name__ == "__main__":
+    GameConfig.target_size = 84
+    GameConfig.n_channels = 4
     tf.reset_default_graph()
-    env = UnityEnvironment()
     h_size = 512
     learning_rate = 0.0001
     n_actions = 2
@@ -66,11 +67,11 @@ if __name__ == "__main__":
     with tf.variable_scope("TargetQNetwork"):
         targetQN = DeepQNetwork(h_size, n_actions, learning_rate)
     pre_train_steps = 10000
-    total_steps = 1000000
+    total_steps = 2000000
     anneling_steps = 10000.
     input_size = GameConfig.target_size * GameConfig.target_size * GameConfig.n_channels
     start_e = 1
-    end_e = 0.1
+    end_e = 0.001
     e = start_e
     update_freq = 4
     batch_size = 32
@@ -83,6 +84,7 @@ if __name__ == "__main__":
     saver = tf.train.Saver()
     path = "./dqn"  # The path to save our model to.
     dp = DataPrerocessing()
+    env = UnityEnvironment()
     with tf.Session() as sess:
         if False:
             writer = tf.summary.FileWriter(logdir="../log", graph=sess.graph)
@@ -90,22 +92,35 @@ if __name__ == "__main__":
         sess.run(tf.global_variables_initializer())
         update_target(targetOps, sess)
         s = env.reset()
-        s = dp.resize_and_normalize(sess, s)
+        x_t = dp.resize_and_threshold(sess, s)
+        s_t = np.stack((x_t, x_t, x_t, x_t), axis=2)
+
         rList = []
         for step in range(total_steps + 1):
             if step <= pre_train_steps or np.random.rand(1) < e:
                 a = np.random.randint(0, n_actions)
             else:
-                a = sess.run(mainQN.predict, feed_dict={mainQN.input_x: [s]})[0]
+                a = sess.run(mainQN.predict, feed_dict={mainQN.input_x: [s_t]})[0]
             s1, r, d = env.step(a)
-            s1 = dp.resize_and_normalize(sess, s1)
+            if d:
+                s1 = env.reset()
+            x_t1 = dp.resize_and_threshold(sess, s1)
+            x_t1 = np.expand_dims(x_t1, axis=2)
+
+            s_t1 = np.append(x_t1, s_t[:, :, :3], axis=2)
+
+            # image_utils.show_image(s_t1[:,:,0], "gray")
+            # image_utils.show_image(s_t1[:,:,1], "gray")
+            # image_utils.show_image(s_t1[:,:,2], "gray")
+            # image_utils.show_image(s_t1[:,:,3], "gray")
+
             rList.append(r)
             # if len(rList) > 25 and np.mean(rList[-25:]) > 20:
             #     print("Action:", a)
             #     cv.imshow("Image", s1)
             #     cv.waitKey()
             experience_buffer.add(
-                np.reshape(np.array([s.reshape([input_size]), a, r, s1.reshape([input_size]), d]), [1, 5]))
+                np.reshape(np.array([s_t.reshape([input_size]), a, r, s_t1.reshape([input_size]), d]), [1, 5]))
 
             if step > pre_train_steps:
                 if e > end_e:
@@ -130,10 +145,8 @@ if __name__ == "__main__":
                         mainQN.actions: train_batch[:, 1],
                         mainQN.targetQ: targetQ})
                     update_target(targetOps, sess)
-            s = s1
-            if d is True:
-                s = env.reset()
-                s = dp.resize_and_normalize(sess, s)
+            s_t = s_t1
+
             if step > 0 and step % 25 == 0:
                 print("step: {}, average reward of last 25 episodes {}, e: {}".format(step, np.mean(rList), e))
                 rList = []

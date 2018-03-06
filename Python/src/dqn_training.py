@@ -93,7 +93,6 @@ def trainNetwork(s, readout, h_fc1, sess):
     # open up a game state to communicate with emulator
     game_state = UnityEnvironment()
 
-
     # store the previous observations in replay memory
     D = deque()
 

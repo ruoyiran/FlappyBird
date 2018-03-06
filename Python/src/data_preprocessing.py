@@ -14,8 +14,8 @@ from game_config import GameConfig
 class DataPrerocessing(object):
     def __init__(self, gray_scale=False):
         with tf.name_scope("ImagePreporcess"):
-            self.input_x = tf.placeholder(dtype=tf.int32, shape=(None, GameConfig.image_height * GameConfig.image_width * GameConfig.n_channels))
-            self.x_reshape = tf.reshape(self.input_x, shape=(-1, GameConfig.image_height, GameConfig.image_width, GameConfig.n_channels))
+            self.input_x = tf.placeholder(dtype=tf.int32, shape=(None, GameConfig.image_height * GameConfig.image_width * 3))
+            self.x_reshape = tf.reshape(self.input_x, shape=(-1, GameConfig.image_height, GameConfig.image_width, 3))
             self.x_reshape = tf.cast(self.x_reshape, tf.uint8)
             self.resized_x = tf.image.resize_bilinear(self.x_reshape, (GameConfig.target_size, GameConfig.target_size))
             self.x_gray = tf.image.rgb_to_grayscale(self.resized_x)
