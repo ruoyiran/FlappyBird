@@ -12,36 +12,40 @@ import numpy as np
 from game_config import GameConfig
 
 class DataPrerocessing(object):
-    def __init__(self, gray_scale=False):
-        with tf.name_scope("ImagePreporcess"):
-            self.input_x = tf.placeholder(dtype=tf.int32, shape=(None, GameConfig.image_height * GameConfig.image_width * 3))
-            self.x_reshape = tf.reshape(self.input_x, shape=(-1, GameConfig.image_height, GameConfig.image_width, 3))
-            self.x_reshape = tf.cast(self.x_reshape, tf.uint8)
-            self.resized_x = tf.image.resize_bilinear(self.x_reshape, (GameConfig.target_size, GameConfig.target_size))
-            self.x_gray = tf.image.rgb_to_grayscale(self.resized_x)
-            if gray_scale:
-                self.normalized_x = tf.div(self.x_gray, 255.0)
-            else:
-                self.normalized_x = tf.div(self.resized_x, 255.0)
+    def __init__(self):
+        with tf.name_scope("Input"):
+            self.input_x = tf.placeholder(dtype=tf.uint8, shape=(None, GameConfig.image_height * GameConfig.image_width * 3),
+                                     name="input_x")
+        with tf.name_scope("Reshape"):
+            x_reshape = tf.reshape(self.input_x, shape=(-1, GameConfig.image_height, GameConfig.image_width, 3),
+                                   name="reshaped_x")
+            x_reshape = tf.cast(x_reshape, tf.uint8)
+        with tf.name_scope("RGB2Gray"):
+            x_gray = tf.image.rgb_to_grayscale(x_reshape, name="gray_x")
+        with tf.name_scope("Threshold"):
+            x_threshold = tf.where(x_gray > 1, 255 * tf.ones_like(x_gray), tf.zeros_like(x_gray),
+                                   name="threshold_x")
+        with tf.name_scope("Target"):
+            resized_x = tf.image.resize_area(x_threshold, (GameConfig.target_size, GameConfig.target_size),
+                                             name="resized_x")
+            resized_x = tf.squeeze(resized_x, [3])
+            self.stacked_x = tf.stack((resized_x, resized_x, resized_x, resized_x), axis=-1, name="stacked_x")
 
-    def run(self, session, data):
-        return session.run(self.normalized_x, feed_dict={self.input_x: [data]})[0]
+        with tf.name_scope("NextTarget"):
+            self.input_stacked_x = tf.placeholder(dtype=tf.float32,
+                                             shape=(None, GameConfig.target_size, GameConfig.target_size, 4),
+                                             name="input_stacked_x")
+            self.next_stacked_x = tf.stack(
+                (resized_x, input_stacked_x[:, :, :, 0], self.input_stacked_x[:, :, :, 1], input_stacked_x[:, :, :, 2]),
+                axis=-1,
+                name="output_stacked_x")
 
-    def resize_and_to_gray(self, session, data):
-        return session.run(self.x_gray, feed_dict={self.input_x: [data]})[0]
+    def resize_and_threshold(self, session, data, stacked_x=None):
+        if stacked_x is None:
+            return session.run(self.stacked_x, feed_dict={self.input_x: [data]})[0]
+        else:
+            return session.run(self.next_stacked_x,
+                               feed_dict={
+                                   self.input_x: [data],
+                                   self.input_stacked_x: [stacked_x]})[0]
 
-    def resize_and_normalize(self, session, data):
-        return session.run(self.normalized_x, feed_dict={self.input_x: [data]})[0]
-
-    def resize(self, session, data):
-        return session.run(self.resized_x, feed_dict={self.input_x: [data]})[0]
-
-    def reshape(self, session, data):
-        return session.run(self.x_reshape, feed_dict={self.input_x: [data]})[0]
-
-    def resize_and_threshold(self, session, data):
-        image = self.reshape(session, data)
-        gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        _, im_th = cv2.threshold(gray_image, 1, 255, cv2.THRESH_BINARY)
-        gray = cv2.resize(im_th, (GameConfig.target_size, GameConfig.target_size), interpolation=cv2.INTER_AREA)
-        return gray
