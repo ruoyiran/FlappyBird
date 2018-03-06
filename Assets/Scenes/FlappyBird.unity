@@ -121,7 +121,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 26225663}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: Backgrounds
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -305,7 +305,7 @@ GameObject:
   - component: {fileID: 110101329}
   - component: {fileID: 110101330}
   - component: {fileID: 110101331}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: SkyBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1186,7 +1186,7 @@ GameObject:
   - component: {fileID: 464114043}
   - component: {fileID: 464114042}
   - component: {fileID: 464114041}
-  m_Layer: 8
+  m_Layer: 0
   m_Name: SkyBackground
   m_TagString: Untagged
   m_Icon: {fileID: 0}

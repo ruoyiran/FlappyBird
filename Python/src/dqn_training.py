@@ -23,7 +23,7 @@ GAMMA = 0.99 # decay rate of past observations
 OBSERVE = 100000. # timesteps to observe before training
 EXPLORE = 2000000. # frames over which to anneal epsilon
 FINAL_EPSILON = 0.0001 # final value of epsilon
-INITIAL_EPSILON = 1.0 # starting value of epsilon
+INITIAL_EPSILON = 0.0001 # starting value of epsilon
 REPLAY_MEMORY = 50000 # number of previous transitions to remember
 BATCH = 32 # size of minibatch
 FRAME_PER_ACTION = 1
@@ -105,8 +105,7 @@ def trainNetwork(s, readout, h_fc1, sess):
     x_t = game_state.reset()
     dp = DataPrerocessing()
 
-    threshold_val = 170
-    x_t = dp.resize_and_threshold(sess, x_t, threshold_val)
+    x_t = dp.resize_and_threshold(sess, x_t)
     s_t = np.stack((x_t, x_t, x_t, x_t), axis=2)
 
     # saving and loading networks
@@ -129,7 +128,7 @@ def trainNetwork(s, readout, h_fc1, sess):
         action_index = 0
         if t % FRAME_PER_ACTION == 0:
             if random.random() <= epsilon:
-                print("----------Random Action----------")
+                # print("----------Random Action----------")
                 action_index = random.randrange(ACTIONS)
                 a_t[random.randrange(ACTIONS)] = 1
             else:
@@ -144,12 +143,13 @@ def trainNetwork(s, readout, h_fc1, sess):
 
         # run the selected action and observe next state and reward
         x_t1_colored, r_t, terminal = game_state.step(action_index)
-        x_t1 = dp.resize_and_threshold(sess, x_t1_colored, threshold_val)
+        if terminal:
+            x_t1_colored = game_state.reset()
+        x_t1 = dp.resize_and_threshold(sess, x_t1_colored)
         x_t1 = np.expand_dims(x_t1, axis=2)
 
         #s_t1 = np.append(x_t1, s_t[:,:,1:], axis = 2)
         s_t1 = np.append(x_t1, s_t[:, :, :3], axis=2)
-
         # store the transition in D
         D.append((s_t, a_t, r_t, s_t1, terminal))
         if len(D) > REPLAY_MEMORY:
@@ -169,9 +169,9 @@ def trainNetwork(s, readout, h_fc1, sess):
             y_batch = []
             readout_j1_batch = readout.eval(feed_dict = {s : s_j1_batch})
             for i in range(0, len(minibatch)):
-                terminal = minibatch[i][4]
+                term = minibatch[i][4]
                 # if terminal, only equals reward
-                if terminal:
+                if term:
                     y_batch.append(r_batch[i])
                 else:
                     y_batch.append(r_batch[i] + GAMMA * np.max(readout_j1_batch[i]))
@@ -185,13 +185,6 @@ def trainNetwork(s, readout, h_fc1, sess):
 
         # update the old values
         s_t = s_t1
-
-        if terminal:
-            s_t = game_state.reset()
-            s_t = dp.resize_and_threshold(sess, s_t, threshold_val)
-            x_t1 = np.expand_dims(s_t, axis=2)
-            s_t = np.append(x_t1, s_t1[:, :, :3], axis=2)
-
         t += 1
 
         # save progress every 10000 iterations

@@ -39,16 +39,9 @@ class DataPrerocessing(object):
     def reshape(self, session, data):
         return session.run(self.x_reshape, feed_dict={self.input_x: [data]})[0]
 
-    def resize_and_threshold(self, session, data, threshold=1):
+    def resize_and_threshold(self, session, data):
         image = self.reshape(session, data)
         gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-        _, im_th = cv2.threshold(gray_image, threshold, 255, cv2.THRESH_BINARY)
-
-        des = cv2.bitwise_not(im_th)
-        (_, contours, _) = cv2.findContours(des, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-        for contour in contours:
-            cv2.drawContours(des, [contour], 0, 255, -1)
-
-        gray = cv2.bitwise_not(des)
-        gray = cv2.resize(gray, (GameConfig.target_size, GameConfig.target_size))
+        _, im_th = cv2.threshold(gray_image, 1, 255, cv2.THRESH_BINARY)
+        gray = cv2.resize(im_th, (GameConfig.target_size, GameConfig.target_size), interpolation=cv2.INTER_AREA)
         return gray
