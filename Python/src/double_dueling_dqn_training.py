@@ -60,20 +60,18 @@ if __name__ == "__main__":
     GameConfig.n_channels = 4
     tf.reset_default_graph()
     h_size = 512
-    final_learning_rate = 1e-6
-    learning_rate = tf.Variable(1e-5)
-    decay_steps = 330000
+    learning_rate = 0.0001
     n_actions = 2
     with tf.variable_scope("MainQNetwork"):
         mainQN = DeepQNetwork(h_size, n_actions, learning_rate)
     with tf.variable_scope("TargetQNetwork"):
         targetQN = DeepQNetwork(h_size, n_actions, learning_rate)
-    pre_train_steps = 20000
+    pre_train_steps = 10000
     total_steps = 2000000
     anneling_steps = 10000.
     input_size = GameConfig.target_size * GameConfig.target_size * GameConfig.n_channels
     start_e = 1
-    end_e = 0.00001
+    end_e = 0.001
     e = start_e
     update_freq = 4
     batch_size = 32
@@ -125,11 +123,6 @@ if __name__ == "__main__":
                 np.reshape(np.array([s_t.reshape([input_size]), a, r, s_t1.reshape([input_size]), d]), [1, 5]))
 
             if step > pre_train_steps:
-                if step > 0 and step % decay_steps == 0:
-                    cur_lr = sess.run(learning_rate)
-                    if cur_lr > final_learning_rate:
-                        sess.run(tf.assign(learning_rate, cur_lr / 10.0))
-
                 if e > end_e:
                     e -= step_drop_e
                 if step % update_freq == 0:
@@ -155,7 +148,7 @@ if __name__ == "__main__":
             s_t = s_t1
 
             if step > 0 and step % 25 == 0:
-                print("step: {}, average reward of last 25 episodes {}, e: {}, learning_rate: {}".format(step, np.mean(rList), e, sess.run(learning_rate)))
+                print("step: {}, average reward of last 25 episodes {}, e: {}".format(step, np.mean(rList), e))
                 rList = []
             if step > 0 and step % 10000 == 0:
                 model_path = "{}/model-{}.ckpt".format(path, step)
