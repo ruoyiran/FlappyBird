@@ -31,7 +31,7 @@ class DeepQNetwork(object):
         Value = tf.layers.dense(streamV, units=1, name="Value")
 
         with tf.variable_scope("Qout"):
-            Qout = tf.add(Value, tf.subtract(Advantage, tf.reduce_mean(Advantage, axis=1, keepdims=True)), name="QValue")
+            Qout = tf.add(Value, tf.subtract(Advantage, tf.reduce_mean(Advantage, axis=1, keep_dims=True)), name="QValue")
             predict = tf.argmax(Qout, 1, name="Predict")
 
         with tf.variable_scope("TargetQ"):
