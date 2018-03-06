@@ -23,9 +23,9 @@ namespace FlappyBird
         private float _bottomBoundY = -2.3f;
 
         private float birdVelY = 0;    // bird's velocity along Y, default same as birdFlapped
-        private float birdMaxVelY = 1f; // max vel along Y, max descend speed
-        private float birdAccY = 0.01f;   // birds downward accleration
-        private float birdFlapAcc = -0.12f;   // birds speed on flapping
+        private float birdMaxVelY = 0.1f; // max vel along Y, max descend speed
+        private float birdAccY = 0.008f;   // birds downward accleration
+        private float birdFlapAcc = -0.1f;   // birds speed on flapping
         private bool birdFlapped = false;
         private void Awake()
         {

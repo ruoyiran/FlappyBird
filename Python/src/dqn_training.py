@@ -188,7 +188,7 @@ def trainNetwork(s, readout, h_fc1, sess):
 
         # save progress every 10000 iterations
         if t % 10000 == 0:
-            saver.save(sess, 'saved_networks/' + GAME + '-dqn', global_step = t)
+            saver.save(sess, 'saved_networks/' + GAME + '-models', global_step = t)
 
         # print info
         state = ""

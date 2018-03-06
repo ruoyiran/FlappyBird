@@ -36,11 +36,11 @@ class DataPrerocessing(object):
                                              shape=(None, GameConfig.target_size, GameConfig.target_size, 4),
                                              name="input_stacked_x")
             self.next_stacked_x = tf.stack(
-                (resized_x, input_stacked_x[:, :, :, 0], self.input_stacked_x[:, :, :, 1], input_stacked_x[:, :, :, 2]),
+                (resized_x, self.input_stacked_x[:, :, :, 0], self.input_stacked_x[:, :, :, 1], self.input_stacked_x[:, :, :, 2]),
                 axis=-1,
                 name="output_stacked_x")
 
-    def resize_and_threshold(self, session, data, stacked_x=None):
+    def get_state_stacked_image(self, session, data, stacked_x=None):
         if stacked_x is None:
             return session.run(self.stacked_x, feed_dict={self.input_x: [data]})[0]
         else:

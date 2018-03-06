@@ -65,7 +65,7 @@ def export_training_model():
     with tf.variable_scope("MainQNetwork"):
         mainQN = DeepQNetwork(h_size, n_actions, learning_rate)
 
-    model_path = "../dqn"
+    model_path = "../models"
     with tf.Session() as sess:
         if False:
             writer = tf.summary.FileWriter("../log", graph=sess.graph)
@@ -99,7 +99,7 @@ def test_tfgraph():
         plt.show()
 
 if __name__ == '__main__':
-    # export_training_model()
-    export_image_preprocessing_graph()
+    export_training_model()
+    # export_image_preprocessing_graph()
 
 

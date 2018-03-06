@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using UnityEngine;
 
 public class LogFileWriter : Utils.Singleton<LogFileWriter> {
     private StreamWriter _logWriter = null;

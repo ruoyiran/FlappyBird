@@ -60,19 +60,19 @@ if __name__ == "__main__":
     GameConfig.n_channels = 4
     tf.reset_default_graph()
     h_size = 512
-    learning_rate = 0.0001
+    learning_rate = 1e-6
     n_actions = 2
     with tf.variable_scope("MainQNetwork"):
         mainQN = DeepQNetwork(h_size, n_actions, learning_rate)
     with tf.variable_scope("TargetQNetwork"):
         targetQN = DeepQNetwork(h_size, n_actions, learning_rate)
-    pre_train_steps = 10000
+    pre_train_steps = 50000
     total_steps = 2000000
     anneling_steps = 10000.
     input_size = GameConfig.target_size * GameConfig.target_size * GameConfig.n_channels
     start_e = 1
-    end_e = 0.001
-    e = start_e
+    end_e = 0.00001
+    e = end_e
     update_freq = 4
     batch_size = 32
     tau = 0.001
@@ -82,33 +82,48 @@ if __name__ == "__main__":
     targetOps = update_target_graph(trainables, tau)
     y = 0.99
     saver = tf.train.Saver()
-    path = "./dqn"  # The path to save our model to.
+    model_dir = "../models"  # The model_dir to save our model to.
     dp = DataPrerocessing()
     env = UnityEnvironment()
     with tf.Session() as sess:
         if False:
             writer = tf.summary.FileWriter(logdir="../log", graph=sess.graph)
             writer.close()
-        sess.run(tf.global_variables_initializer())
+
+        checkpoint = tf.train.get_checkpoint_state(model_dir)
+        if checkpoint and checkpoint.model_checkpoint_path:
+            saver.restore(sess, checkpoint.model_checkpoint_path)
+            print("Successfully loaded:", checkpoint.model_checkpoint_path)
+        else:
+            print("Could not find old network weights")
+            sess.run(tf.global_variables_initializer())
         update_target(targetOps, sess)
         s = env.reset()
-        x_t = dp.resize_and_threshold(sess, s)
-        s_t = np.stack((x_t, x_t, x_t, x_t), axis=2)
+        s_t = dp.get_state_stacked_image(sess, s)
 
         rList = []
+        total_score = 0
+        max_score = 0
+        prev_reward = 0
         for step in range(total_steps + 1):
-            if step <= pre_train_steps or np.random.rand(1) < e:
+            if np.random.rand(1) < e:
                 a = np.random.randint(0, n_actions)
             else:
                 a = sess.run(mainQN.predict, feed_dict={mainQN.input_x: [s_t]})[0]
+                qvalues = sess.run(mainQN.Qout, feed_dict={mainQN.input_x: [s_t]})[0]
+
             s1, r, d = env.step(a)
+            if r == 10 and prev_reward != 10:
+                prev_reward = r
+                total_score += 1
             if d:
+                if total_score > max_score:
+                    max_score = total_score
+                print("Step: %d ====> Bird dead, got score: %d, max score: %d" % (step, total_score, max_score))
+                total_score = 0
                 s1 = env.reset()
-            x_t1 = dp.resize_and_threshold(sess, s1)
-            x_t1 = np.expand_dims(x_t1, axis=2)
-
-            s_t1 = np.append(x_t1, s_t[:, :, :3], axis=2)
-
+            prev_reward = r
+            s_t1 = dp.get_state_stacked_image(sess, s1, s_t)
             # image_utils.show_image(s_t1[:,:,0], "gray")
             # image_utils.show_image(s_t1[:,:,1], "gray")
             # image_utils.show_image(s_t1[:,:,2], "gray")
@@ -151,12 +166,12 @@ if __name__ == "__main__":
                 print("step: {}, average reward of last 25 episodes {}, e: {}".format(step, np.mean(rList), e))
                 rList = []
             if step > 0 and step % 10000 == 0:
-                model_path = "{}/model-{}.ckpt".format(path, step)
+                model_path = "{}/model-{}.ckpt".format(model_dir, step)
                 print("===> Step: {}, Saving mode to {}".format(step, model_path))
                 saver.save(sess=sess, save_path=model_path)
             # if step > 0 and step % 10000 == 0:
-            #     export_graph(sess, path, target_nodes="MainQNetwork/Qout/QValue")
-        export_graph(sess, path, target_nodes="MainQNetwork/Qout/QValue")
+            #     export_graph(sess, model_dir, target_nodes="MainQNetwork/Qout/QValue")
+        export_graph(sess, model_dir, target_nodes="MainQNetwork/Qout/QValue")
         print("Training finished.")
 
     env.close()
