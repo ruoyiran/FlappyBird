@@ -58,4 +58,10 @@ public class Algorithm {
         }
         return maxIndex;
     }
+
+    public static int Rgb2Gray(int r, int g, int b)
+    {
+        int gray = (int)((299 * r + 587 * g + 114 * b) / 1000.0);
+        return gray;
+    }
 }

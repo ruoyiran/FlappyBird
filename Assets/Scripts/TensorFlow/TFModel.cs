@@ -107,7 +107,7 @@ public class TFModel
     {
         if (!_bModelLoaded)
             return null;
-        var runner = _session.GetRunner();
+        TFSession.Runner runner = _session.GetRunner();
         runner.AddInput(_tfGraph[inputNode][0], intput);
         runner.Fetch(_tfGraph[outputNode][0]);
         TFTensor[] output = runner.Run();
@@ -120,8 +120,8 @@ public class TFModel
         if (!_bModelLoaded)
             return null;
 
-        var runner = _session.GetRunner();
         var tensor = TFTensor.FromBuffer(new TFShape(1, inputData.Length), inputData, 0, inputData.Length);
+        TFSession.Runner runner = _session.GetRunner();
         runner.AddInput(_tfGraph[inputNode][0], tensor);
         runner.Fetch(_tfGraph[outputNode][0]);
         TFTensor[] output = runner.Run();
