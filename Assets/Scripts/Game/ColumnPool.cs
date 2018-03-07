@@ -5,10 +5,10 @@ namespace FlappyBird
     public class ColumnPool : MonoBehaviour
     {
         public GameObject firstColumnObj;
-        private float maxColumnGapY = 1.0f;
-        private float spaceX = 5f;
+        private float maxColumnGapY = 0.5f;
+        private float spaceX = 4f;
         private float columnMinY = -4.0f;
-        private float columnMaxY = -1.5f;
+        private float columnMaxY = -2.0f;
         private int maxColumns = 6;
         private GameObject[] columnObjs;
         private float halfOfViewWidth;
@@ -60,7 +60,7 @@ namespace FlappyBird
                 return;
             columnObjs = new GameObject[maxColumns];
             columnObjs[0] = firstColumnObj;
-            _prevColumnY = columnMaxY;
+            _prevColumnY = columnMinY;
             for (int i = 1; i < maxColumns; i++)
             {
                 GameObject columnObj = Instantiate(firstColumnObj, Vector3.zero, Quaternion.identity, transform);
@@ -78,7 +78,6 @@ namespace FlappyBird
                 startX += spaceX;
             }
         }
-
         private float GetRandomY()
         {
             float randomY = Random.Range(columnMinY, columnMaxY);

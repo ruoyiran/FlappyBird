@@ -45,9 +45,12 @@ class DeepQNetwork(object):
             td_error = tf.square(targetQ - Q)
         with tf.variable_scope("Loss"):
             loss = tf.reduce_mean(td_error)
+
+        lr = tf.Variable(learning_rate, name="learning_rate")
+        global_step = tf.Variable(0, trainable=False)
         with tf.variable_scope("Trainer"):
-            trainer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-        update_model = trainer.minimize(loss)
+            trainer = tf.train.AdamOptimizer(learning_rate=lr)
+        update_model = trainer.minimize(loss, global_step=global_step)
 
         print("x", x.get_shape())
         print("conv1", conv1.get_shape())
@@ -69,3 +72,5 @@ class DeepQNetwork(object):
         self.targetQ = targetQ
         self.actions = actions
         self.update_model = update_model
+        self.lr = lr
+        self.global_step = global_step

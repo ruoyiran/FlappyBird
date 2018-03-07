@@ -12,7 +12,7 @@ namespace UTJ.FrameCapturer
         // -------------------------------------------------------------
         // Foundation
         // -------------------------------------------------------------
-
+        private static Texture2D texture2d = null;
         public enum fcPixelFormat
         {
             Unknown = 0,
@@ -594,17 +594,14 @@ namespace UTJ.FrameCapturer
         [DllImport ("fccore")] public static extern void fcFlacAddOutputStream(fcFlacContext ctx, fcStream stream);
         [DllImport ("fccore")] public static extern Bool fcFlacAddAudioSamples(fcFlacContext ctx, float[] samples, int num_samples);
 
-
-
-
         public static void fcLock(RenderTexture src, TextureFormat dstfmt, Action<byte[], fcPixelFormat> body)
         {
-            var tex = new Texture2D(src.width, src.height, dstfmt, false);
+            if (texture2d == null)
+                texture2d = new Texture2D(src.width, src.height, dstfmt, false);
             RenderTexture.active = src;
-            tex.ReadPixels(new Rect(0, 0, tex.width, tex.height), 0, 0, false);
-            tex.Apply();
-            body(tex.GetRawTextureData(), fcGetPixelFormat(tex.format));
-            UnityEngine.Object.Destroy(tex);
+            texture2d.ReadPixels(new Rect(0, 0, texture2d.width, texture2d.height), 0, 0, false);
+            texture2d.Apply();
+            body(texture2d.GetRawTextureData(), fcGetPixelFormat(texture2d.format));
         }
 
         public static void fcLock(RenderTexture src, Action<byte[], fcPixelFormat> body)

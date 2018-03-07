@@ -25,6 +25,7 @@ namespace Network
 
         public bool ConnectToServer(string ipAddress, int port)
         {
+            Logger.Print("Communicator.ConnectToServer - ipAddress: {0}, port: {1}", ipAddress, port);
             if (_connected)
                 return true;
             try

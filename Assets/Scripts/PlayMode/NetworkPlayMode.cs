@@ -19,13 +19,11 @@ namespace FlappyBird
         private void Start()
         {
             Logger.Print("NetworkPlayMode.Start");
-            InitIpAddrAndPort();
         }
 
         private new void Update()
         {
             base.Update();
-
         }
 
         private void LateUpdate()
@@ -62,6 +60,8 @@ namespace FlappyBird
 
         private void ConnectToNetwork()
         {
+            InitIpAddrAndPort();
+
             if (_communicator == null)
                 _communicator = new Communicator();
             if (!_communicator.IsConnected)

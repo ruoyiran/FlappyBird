@@ -10,9 +10,9 @@ public class DevSwitch
         string value = "";
 
 #if (UNITY_ANDROID || UNITY_IPHONE) && !UNITY_EDITOR
-        string filePath = Application.persistentDataPath + "/DevSwitch";
+        string filePath = Application.persistentDataPath + "/Config.txt";
 #else
-        string filePath = System.Environment.CurrentDirectory + "/DevSwitch";
+        string filePath = System.Environment.CurrentDirectory + "/Config.txt";
 #endif
 
         if (!File.Exists(filePath))

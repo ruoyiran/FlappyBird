@@ -28,16 +28,18 @@ public class TFModel
     {
         if (_bModelLoaded)
             return true;
-        Logger.Print("Load TF model from '{0}'", modelPath);
-        byte[] bytes = File.ReadAllBytes(modelPath);
-        if (bytes == null || bytes.Length == 0)
-        {
-            Logger.Error("TFModel.LoadModelFromPath - failed to load tf model from '{0}'", modelPath);
-            return false;
-        }
         try
         {
+            Logger.Print("Load TF model from '{0}'", modelPath);
+            byte[] bytes = File.ReadAllBytes(modelPath);
+            if (bytes == null || bytes.Length == 0)
+            {
+                Logger.Error("TFModel.LoadModelFromPath - failed to load tf model from '{0}'", modelPath);
+                return false;
+            }
+            Logger.Print("Try to import data bytes, length: {0}", bytes.Length);
             _tfGraph.Import(bytes);
+            Logger.Print("Create session...");
             _session = new TFSession(_tfGraph);
         }
         catch (Exception ex)
@@ -54,17 +56,19 @@ public class TFModel
     {
         if (_bModelLoaded)
             return true;
-        Logger.Print("TFModel.LoadGraphDef - Load TF graph def from '{0}'", graphPath);
-        byte[] bytes = File.ReadAllBytes(graphPath);
-        if (bytes == null || bytes.Length == 0)
-        {
-            Logger.Error("TFModel.LoadGraphDef - failed to load tf model from '{0}'", graphPath);
-            return false;
-        }
-        TFBuffer graphDef = new TFBuffer(bytes);
         try
         {
+            Logger.Print("TFModel.LoadGraphDef - Load TF graph def from '{0}'", graphPath);
+            byte[] bytes = File.ReadAllBytes(graphPath);
+            if (bytes == null || bytes.Length == 0)
+            {
+                Logger.Error("TFModel.LoadGraphDef - failed to load tf model from '{0}'", graphPath);
+                return false;
+            }
+            TFBuffer graphDef = new TFBuffer(bytes);
+            Logger.Print("Try to import graphDef, bytes length: {0}", bytes.Length);
             _tfGraph.Import(graphDef);
+            Logger.Print("Create session...");
             _session = new TFSession(_tfGraph);
         }
         catch (Exception ex)

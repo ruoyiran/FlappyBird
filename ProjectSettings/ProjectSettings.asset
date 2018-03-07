@@ -551,6 +551,7 @@ PlayerSettings:
   webGLUseWasm: 0
   webGLCompressionFormat: 1
   scriptingDefineSymbols:
+    1: ENABLE_TENSORFLOW
     7: ENABLE_TENSORFLOW
   platformArchitecture: {}
   scriptingBackend: {}

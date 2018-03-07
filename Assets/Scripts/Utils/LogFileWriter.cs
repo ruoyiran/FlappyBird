@@ -6,7 +6,7 @@ using UnityEngine;
 public class LogFileWriter : Utils.Singleton<LogFileWriter> {
     private StreamWriter _logWriter = null;
 
-    public void Write(string log)
+    public void Write(string log, bool stackTrace = false)
     {
         if (_logWriter == null)
         {
@@ -16,6 +16,11 @@ public class LogFileWriter : Utils.Singleton<LogFileWriter> {
         if(_logWriter != null)
         {
             _logWriter.WriteLine(GetFormatLogStrWithTime(log));
+            if (stackTrace)
+            {
+                System.Diagnostics.StackTrace trace = new System.Diagnostics.StackTrace();
+                _logWriter.WriteLine(trace.ToString());
+            }
         }
     }
 

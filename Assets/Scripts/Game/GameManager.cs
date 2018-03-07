@@ -47,6 +47,10 @@ namespace FlappyBird
 
         private void Awake()
         {
+#if UNITY_ANDROID && ENABLE_TENSORFLOW
+            Logger.Print("GameManager.Awake - TensorFlowSharp.Android.NativeBinding.Init called.");
+            TensorFlowSharp.Android.NativeBinding.Init();
+#endif
             _instance = this;
             Application.runInBackground = true;
         }

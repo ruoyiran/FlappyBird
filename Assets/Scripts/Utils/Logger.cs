@@ -21,13 +21,12 @@ public class Logger {
         string log = string.Format(format, args);
         Debug.LogError(log);
 
-        System.Diagnostics.StackTrace trace = new System.Diagnostics.StackTrace();
-        LogFileWriter.Instance.Write(log);
-        LogFileWriter.Instance.Write(trace.ToString());
+        LogFileWriter.Instance.Write(log, true);
     }
 
     public static void Exception(System.Exception ex)
     {
         Debug.LogException(ex);
+        LogFileWriter.Instance.Write(ex.Message, true);
     }
 }

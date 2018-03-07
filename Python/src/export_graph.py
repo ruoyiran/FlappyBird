@@ -15,7 +15,7 @@ def export_graph(sess, model_dir, target_nodes):
     print("Exporting graph...")
     tf.train.write_graph(sess.graph_def, model_dir, 'raw_graph_def.pb', as_text=False)
     ckpt = tf.train.get_checkpoint_state(model_dir)
-    output_graph = model_dir + "/graph_def.bytes"
+    output_graph = model_dir + "/training_model.bytes"
     freeze_graph.freeze_graph(input_graph=model_dir + '/raw_graph_def.pb',
                               input_binary=True,
                               input_checkpoint=ckpt.model_checkpoint_path,
@@ -34,6 +34,7 @@ def export_image_preprocessing_graph():
         x_reshape = tf.cast(x_reshape, tf.uint8)
     with tf.name_scope("RGB2Gray"):
         x_gray = tf.image.rgb_to_grayscale(x_reshape, name="gray_x")
+        x_gray = tf.cast(x_gray, tf.float32)
     with tf.name_scope("Threshold"):
         x_threshold = tf.where(x_gray > 1, 255 * tf.ones_like(x_gray), tf.zeros_like(x_gray),
                                name="threshold_x")
@@ -99,7 +100,7 @@ def test_tfgraph():
         plt.show()
 
 if __name__ == '__main__':
-    export_training_model()
-    # export_image_preprocessing_graph()
+    # export_training_model()
+    export_image_preprocessing_graph()
 
 

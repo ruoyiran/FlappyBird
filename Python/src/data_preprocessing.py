@@ -22,6 +22,7 @@ class DataPrerocessing(object):
             x_reshape = tf.cast(x_reshape, tf.uint8)
         with tf.name_scope("RGB2Gray"):
             x_gray = tf.image.rgb_to_grayscale(x_reshape, name="gray_x")
+            x_gray = tf.cast(x_gray, tf.float32)
         with tf.name_scope("Threshold"):
             x_threshold = tf.where(x_gray > 1, 255 * tf.ones_like(x_gray), tf.zeros_like(x_gray),
                                    name="threshold_x")

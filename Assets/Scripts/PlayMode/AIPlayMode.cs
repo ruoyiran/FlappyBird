@@ -12,7 +12,7 @@ namespace FlappyBird
 #if ENABLE_TENSORFLOW
         private TFModel _tfTrainingModel;
         private TFModel _tfPreprocessingModel;
-        private const string TF_TRAINING_MODEL_PATH = "TFModel/graph_def.bytes";
+        private const string TF_TRAINING_MODEL_PATH = "TFModel/training_model.bytes";
         private const string TF_PREPROCESSING_GRAPH_DEF_PATH = "TFModel/image_preprocess_graph_def.pb";
         private const string PREPROCESSING_INPUT_NAME = "Input/input_x";
         private const string PREPROCESSING_OUTPUT_NAME = "Target/stacked_x";
@@ -38,6 +38,7 @@ namespace FlappyBird
 
         private new void Update()
         {
+
         }
 
         private void FixedUpdate()
@@ -57,24 +58,32 @@ namespace FlappyBird
         private Bird.Action GetAction()
         {
 #if ENABLE_TENSORFLOW
-            byte[] imageData = GameManager.Instance.frameRecorder.GetFrameImageData();
-            if (inputTensor == null)
+            try
             {
-                inputTensor = _tfPreprocessingModel.GetOutput(PREPROCESSING_INPUT_NAME, PREPROCESSING_OUTPUT_NAME, imageData);
+                byte[] imageData = GameManager.Instance.frameRecorder.GetFrameImageData();
+                if (inputTensor == null)
+                {
+                    inputTensor = _tfPreprocessingModel.GetOutput(PREPROCESSING_INPUT_NAME, PREPROCESSING_OUTPUT_NAME, imageData);
+                }
+                else
+                {
+                    inputTensor = _tfPreprocessingModel.GetNextState(
+                                                    PREPROCESSING_INPUT_NAME,
+                                                    imageData,
+                                                    PREPROCESSING_NEXT_INPUT_NAME,
+                                                    PREPROCESSING_NEXT_OUTPUT_NAME,
+                                                    inputTensor);
+                }
+                float[,] qvalues = _tfTrainingModel.GetValue(NET_INPUT_NAME, NET_OUTPUT_NAME, inputTensor);
+                float q1 = qvalues[0, 0];
+                float q2 = qvalues[0, 1];
+                return q2 > q1 ? Bird.Action.Flap : Bird.Action.Idle;
             }
-            else
+            catch (Exception ex)
             {
-                inputTensor = _tfPreprocessingModel.GetNextState(
-                                                PREPROCESSING_INPUT_NAME,
-                                                imageData,
-                                                PREPROCESSING_NEXT_INPUT_NAME, 
-                                                PREPROCESSING_NEXT_OUTPUT_NAME, 
-                                                inputTensor);
+                Logger.Exception(ex);
+                return Bird.Action.Idle;
             }
-            float[,] qvalues = _tfTrainingModel.GetValue(NET_INPUT_NAME, NET_OUTPUT_NAME, inputTensor);
-            float q1 = qvalues[0, 0];
-            float q2 = qvalues[0, 1];
-            return q2 > q1 ? Bird.Action.Flap : Bird.Action.Idle;
 #else
             return Bird.Action.Idle;
 #endif

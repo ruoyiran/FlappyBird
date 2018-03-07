@@ -60,7 +60,9 @@ if __name__ == "__main__":
     GameConfig.n_channels = 4
     tf.reset_default_graph()
     h_size = 512
-    learning_rate = 1e-6
+    learning_rate = 1e-4
+    decay_steps = 300000
+    final_learning_rate = 1e-6
     n_actions = 2
     with tf.variable_scope("MainQNetwork"):
         mainQN = DeepQNetwork(h_size, n_actions, learning_rate)
@@ -68,7 +70,7 @@ if __name__ == "__main__":
         targetQN = DeepQNetwork(h_size, n_actions, learning_rate)
     pre_train_steps = 50000
     total_steps = 2000000
-    anneling_steps = 10000.
+    anneling_steps = 50000.
     input_size = GameConfig.target_size * GameConfig.target_size * GameConfig.n_channels
     start_e = 1
     end_e = 0.00001
@@ -90,13 +92,13 @@ if __name__ == "__main__":
             writer = tf.summary.FileWriter(logdir="../log", graph=sess.graph)
             writer.close()
 
-        checkpoint = tf.train.get_checkpoint_state(model_dir)
-        if checkpoint and checkpoint.model_checkpoint_path:
-            saver.restore(sess, checkpoint.model_checkpoint_path)
-            print("Successfully loaded:", checkpoint.model_checkpoint_path)
-        else:
-            print("Could not find old network weights")
-            sess.run(tf.global_variables_initializer())
+        # checkpoint = tf.train.get_checkpoint_state(model_dir)
+        # if checkpoint and checkpoint.model_checkpoint_path:
+        #     saver.restore(sess, checkpoint.model_checkpoint_path)
+        #     print("Successfully loaded:", checkpoint.model_checkpoint_path)
+        # else:
+        #     print("Could not find old network weights")
+        sess.run(tf.global_variables_initializer())
         update_target(targetOps, sess)
         s = env.reset()
         s_t = dp.get_state_stacked_image(sess, s)
@@ -105,6 +107,7 @@ if __name__ == "__main__":
         total_score = 0
         max_score = 0
         prev_reward = 0
+        is_saved = False
         for step in range(total_steps + 1):
             if np.random.rand(1) < e:
                 a = np.random.randint(0, n_actions)
@@ -140,7 +143,12 @@ if __name__ == "__main__":
             if step > pre_train_steps:
                 if e > end_e:
                     e -= step_drop_e
+                if step % decay_steps == 0:
+                    curr_lr = sess.run(mainQN.lr)
+                    if curr_lr > final_learning_rate:
+                        sess.run(tf.assign(mainQN.lr, curr_lr/10.0))
                 if step % update_freq == 0:
+                    is_saved = False
                     train_batch = experience_buffer.sample(batch_size)
                     inputs = np.reshape(np.vstack(train_batch[:, 3]),
                                         [-1, GameConfig.target_size, GameConfig.target_size, GameConfig.n_channels])
@@ -161,14 +169,15 @@ if __name__ == "__main__":
                         mainQN.targetQ: targetQ})
                     update_target(targetOps, sess)
             s_t = s_t1
-
             if step > 0 and step % 25 == 0:
-                print("step: {}, average reward of last 25 episodes {}, e: {}".format(step, np.mean(rList), e))
+                print("step: {}, average reward of last 25 episodes {}, e: {}, learning_rate: {}".format(step, np.mean(rList), e, sess.run(mainQN.lr)))
                 rList = []
-            if step > 0 and step % 10000 == 0:
-                model_path = "{}/model-{}.ckpt".format(model_dir, step)
-                print("===> Step: {}, Saving mode to {}".format(step, model_path))
+            global_step = sess.run(mainQN.global_step)
+            if global_step > 0 and global_step % 10000 == 0 and not is_saved:
+                model_path = "{}/model-{}.ckpt".format(model_dir, global_step)
+                print("===> Global Step: {}, Saving mode to {}".format(global_step, model_path))
                 saver.save(sess=sess, save_path=model_path)
+                is_saved = True
             # if step > 0 and step % 10000 == 0:
             #     export_graph(sess, model_dir, target_nodes="MainQNetwork/Qout/QValue")
         export_graph(sess, model_dir, target_nodes="MainQNetwork/Qout/QValue")

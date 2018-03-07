@@ -137,7 +137,6 @@ namespace FlappyBird
             GameManager.Instance.enviroment.SetMaxColumnGapY(param.maxGapY);
             GameManager.Instance.enviroment.SetScrollSpeed(param.scrollSpeed);
             GameManager.Instance.bird.SetFlapForce(param.flapForce);
-            GameManager.Instance.bird.SetGravity(param.gravity);
         }
     }
 }
