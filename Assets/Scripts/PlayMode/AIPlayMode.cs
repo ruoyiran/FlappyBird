@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.IO;
 #if ENABLE_TENSORFLOW
 using TensorFlow;
@@ -12,6 +13,7 @@ namespace FlappyBird
 #if ENABLE_TENSORFLOW
         private TFModel _tfTrainingModel;
         private TFModel _tfPreprocessingModel;
+        private const string TF_TRAINING_MODEL_DIR = "TFModel";
         private const string TF_TRAINING_MODEL_PATH = "TFModel/training_model.bytes";
         private const string TF_PREPROCESSING_GRAPH_DEF_PATH = "TFModel/image_preprocess_graph_def.pb";
         private const string PREPROCESSING_INPUT_NAME = "Input/input_x";
@@ -28,6 +30,9 @@ namespace FlappyBird
 #if ENABLE_TENSORFLOW
             _tfTrainingModel = new TFModel();
             _tfPreprocessingModel = new TFModel();
+
+            if(!File.Exists(Path.Combine(Application.persistentDataPath, TF_TRAINING_MODEL_DIR)))
+                Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, TF_TRAINING_MODEL_DIR));
 #endif
         }
 

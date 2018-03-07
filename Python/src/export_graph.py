@@ -25,34 +25,36 @@ def export_graph(sess, model_dir, target_nodes):
                               restore_op_name="save/restore_all", filename_tensor_name="save/Const:0")
 
 def export_image_preprocessing_graph():
-    with tf.name_scope("Input"):
-        input_x = tf.placeholder(dtype=tf.uint8, shape=(None, GameConfig.image_height * GameConfig.image_width * 3),
-                                 name="input_x")
-    with tf.name_scope("Reshape"):
-        x_reshape = tf.reshape(input_x, shape=(-1, GameConfig.image_height, GameConfig.image_width, 3),
-                               name="reshaped_x")
-        x_reshape = tf.cast(x_reshape, tf.uint8)
-    with tf.name_scope("RGB2Gray"):
-        x_gray = tf.image.rgb_to_grayscale(x_reshape, name="gray_x")
-        x_gray = tf.cast(x_gray, tf.float32)
-    with tf.name_scope("Threshold"):
-        x_threshold = tf.where(x_gray > 1, 255 * tf.ones_like(x_gray), tf.zeros_like(x_gray),
-                               name="threshold_x")
-    with tf.name_scope("Target"):
-        resized_x = tf.image.resize_area(x_threshold, (GameConfig.target_size, GameConfig.target_size),
-                                             name="resized_x")
-        resized_x = tf.squeeze(resized_x, [3])
-        stacked_x = tf.stack((resized_x, resized_x, resized_x, resized_x), axis=-1, name="stacked_x")
+    graph = tf.Graph()
+    with graph.as_default():
+        with tf.name_scope("Input"):
+            input_x = tf.placeholder(dtype=tf.uint8, shape=(None, GameConfig.image_height * GameConfig.image_width * 3),
+                                     name="input_x")
+        with tf.name_scope("Reshape"):
+            x_reshape = tf.reshape(input_x, shape=(-1, GameConfig.image_height, GameConfig.image_width, 3),
+                                   name="reshaped_x")
+            x_reshape = tf.cast(x_reshape, tf.uint8)
+        with tf.name_scope("RGB2Gray"):
+            x_gray = tf.image.rgb_to_grayscale(x_reshape, name="gray_x")
+            x_gray = tf.cast(x_gray, tf.float32)
+        with tf.name_scope("Threshold"):
+            x_threshold = tf.where(x_gray > 1, 255 * tf.ones_like(x_gray), tf.zeros_like(x_gray),
+                                   name="threshold_x")
+        with tf.name_scope("Target"):
+            resized_x = tf.image.resize_area(x_threshold, (GameConfig.target_size, GameConfig.target_size),
+                                                 name="resized_x")
+            resized_x = tf.squeeze(resized_x, [3])
+            stacked_x = tf.stack((resized_x, resized_x, resized_x, resized_x), axis=-1, name="stacked_x")
 
-    with tf.name_scope("NextTarget"):
-        input_stacked_x = tf.placeholder(dtype=tf.float32,
-                                         shape=(None, GameConfig.target_size, GameConfig.target_size, 4),
-                                         name="input_stacked_x")
-        next_stacked_x = tf.stack((resized_x, input_stacked_x[:, :, :, 0], input_stacked_x[:, :, :, 1], input_stacked_x[:, :, :, 2]),
-                                  axis=-1,
-                                  name="output_stacked_x")
+        with tf.name_scope("NextTarget"):
+            input_stacked_x = tf.placeholder(dtype=tf.float32,
+                                             shape=(None, GameConfig.target_size, GameConfig.target_size, 4),
+                                             name="input_stacked_x")
+            next_stacked_x = tf.stack((resized_x, input_stacked_x[:, :, :, 0], input_stacked_x[:, :, :, 1], input_stacked_x[:, :, :, 2]),
+                                      axis=-1,
+                                      name="output_stacked_x")
 
-    tf.train.write_graph(tf.get_default_graph(), "../graphs", 'image_preprocess_graph_def.pb', as_text=False)
+    tf.train.write_graph(graph, "../graphs", 'image_preprocess_graph_def.pb', as_text=False)
     return input_x, stacked_x
 
 def export_training_model():
@@ -100,7 +102,8 @@ def test_tfgraph():
         plt.show()
 
 if __name__ == '__main__':
-    # export_training_model()
     export_image_preprocessing_graph()
+    export_training_model()
+
 
 
