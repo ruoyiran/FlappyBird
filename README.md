@@ -5,5 +5,12 @@ This project follows the description of the Deep Q Learning algorithm described 
 
 ![Network Description](https://github.com/Ruoyiran/FlappyBird/blob/master/Images/Network%20Description.png)
 
-**TensorFlow Network Structure Graph**
+
+## TensorFlow Network Structure Graph
 ![Network Structure](https://github.com/Ruoyiran/FlappyBird/blob/master/Images/TF%20Network%20Graph.png)
+
+## Requirements
+* Python3
+* TensorFlow 1.5
+* Unity 2017.3 or above
+* Unity Tensorflow Plugin [(Download here)](https://s3.amazonaws.com/unity-agents/0.2/TFSharpPlugin.unitypackage)
