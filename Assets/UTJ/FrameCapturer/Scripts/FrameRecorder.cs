@@ -239,7 +239,6 @@ namespace UTJ.FrameCapturer
             yield return new WaitForEndOfFrame();
             if (m_recording && m_encoder != null && Time.frameCount % m_captureEveryNthFrame == 0)
             {
-                double startTime = DateTime.Now.Ticks / 10000.0;
                 double timestamp = Time.unscaledTime - m_initialTime;
                 if (m_framerateMode == FrameRateMode.Constant)
                 {
@@ -252,8 +251,6 @@ namespace UTJ.FrameCapturer
                     IsCaptured = true;
                 });
                 ++m_recordedFrames;
-                double endTime = DateTime.Now.Ticks / 10000.0;
-                Logger.Print("OnPostRender cost: {0}", endTime - startTime);
             }
             ++m_frame;
         }

@@ -21,26 +21,7 @@ def rgb2gray(r, g, b):
 dp = DataPrerocessing()
 env = UnityEnvironment()
 s = env.reset()
-image_data = np.array(list(s))
-print(image_data.shape, image_data.dtype)
-image_channel_r = image_data[:GameConfig.image_height*GameConfig.image_width]
-# gray = image_channel_r.reshape((GameConfig.image_width, GameConfig.image_height))
-gray = np.zeros((GameConfig.image_height, GameConfig.image_width), np.uint8)
-binary = np.zeros((GameConfig.image_height, GameConfig.image_width), np.uint8)
-for i in range(GameConfig.image_height):
-    for j in range(GameConfig.image_width):
-        index = j + i * GameConfig.image_width
-        r = image_data[3*index]
-        g = image_data[3*index + 1]
-        b = image_data[3*index + 2]
-        gray[i][j] = rgb2gray(r, g, b)
-        binary[i][j] = 255 if gray[i][j] > 0 else 0
-
-import image_utils
-image_utils.show_image(gray, "gray")
-image_utils.show_image(binary, "gray")
-image_utils.show_image(image_data.reshape((GameConfig.image_height, GameConfig.image_width, 3)).astype(np.uint8), "gray")
-if False:
+if True:
     with tf.Session() as sess:
         # image = dp.resize_and_normalize(sess, s)
         # image = dp.resize(sess, s)
@@ -60,5 +41,27 @@ if False:
                 s = env.reset()
                 image = dp.get_state_stacked_image(sess, s)
                 image_utils.show_image(image[:, :, 0], "gray")
+else:
+    image_data = np.array(list(s))
+    print(image_data.shape, image_data.dtype)
+    image_channel_r = image_data[:GameConfig.image_height * GameConfig.image_width]
+    # gray = image_channel_r.reshape((GameConfig.image_width, GameConfig.image_height))
+    gray = np.zeros((GameConfig.image_height, GameConfig.image_width), np.uint8)
+    binary = np.zeros((GameConfig.image_height, GameConfig.image_width), np.uint8)
+    for i in range(GameConfig.image_height):
+        for j in range(GameConfig.image_width):
+            index = j + i * GameConfig.image_width
+            r = image_data[3 * index]
+            g = image_data[3 * index + 1]
+            b = image_data[3 * index + 2]
+            gray[i][j] = rgb2gray(r, g, b)
+            binary[i][j] = 255 if gray[i][j] > 0 else 0
+
+    import image_utils
+
+    image_utils.show_image(gray, "gray")
+    image_utils.show_image(binary, "gray")
+    image_utils.show_image(image_data.reshape((GameConfig.image_height, GameConfig.image_width, 3)).astype(np.uint8),
+                           "gray")
 
 env.close()
