@@ -2,7 +2,7 @@
 @version: 1.0
 @author: Roy
 @contact: iranpeng@gmail.com
-@file: double_dueling_dqn.py.py
+@file: dueling_dqn_network.py.py
 @time: 2018/1/6
 """
 import tensorflow as tf

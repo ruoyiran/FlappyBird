@@ -2,7 +2,7 @@
 @version: 1.0
 @author: Roy
 @contact: iranpeng@gmail.com
-@file: double_dueling_dqn_training.py.py
+@file: dueling_dqn_training.py.py
 @time: 2018/1/7
 """
 
@@ -11,7 +11,7 @@ import random
 import tensorflow as tf
 import image_utils
 from unity_environment import UnityEnvironment
-from double_dueling_dqn import DeepQNetwork
+from dueling_dqn_network import DeepQNetwork
 from data_preprocessing import DataPrerocessing
 from tensorflow.python.tools import freeze_graph
 from game_config import GameConfig

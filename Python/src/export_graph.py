@@ -7,7 +7,7 @@
 '''
 
 import tensorflow as tf
-from double_dueling_dqn import DeepQNetwork
+from dueling_dqn_network import DeepQNetwork
 from game_config import GameConfig
 from tensorflow.python.tools import freeze_graph
 
