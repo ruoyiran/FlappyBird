@@ -28,7 +28,7 @@ class DataPrerocessing(object):
                                    name="threshold_x")
         with tf.name_scope("Target"):
             resized_x = tf.image.resize_images(x_threshold, (GameConfig.target_size, GameConfig.target_size),
-                                               method=tf.image.ResizeMethod.BILINEAR)
+                                               method=tf.image.ResizeMethod.AREA)
             resized_x = tf.squeeze(resized_x, [3])
             self.stacked_x = tf.stack((resized_x, resized_x, resized_x, resized_x), axis=-1, name="stacked_x")
 
