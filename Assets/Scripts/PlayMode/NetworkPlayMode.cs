@@ -23,7 +23,6 @@ namespace FlappyBird
 
         private new void Update()
         {
-            base.Update();
         }
 
         private void LateUpdate()
