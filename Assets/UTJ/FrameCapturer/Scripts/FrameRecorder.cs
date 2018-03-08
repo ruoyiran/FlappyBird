@@ -239,7 +239,6 @@ namespace UTJ.FrameCapturer
             yield return new WaitForEndOfFrame();
             if (m_recording && m_encoder != null && Time.frameCount % m_captureEveryNthFrame == 0)
             {
-
                 double timestamp = Time.unscaledTime - m_initialTime;
                 if (m_framerateMode == FrameRateMode.Constant)
                 {

@@ -47,6 +47,7 @@ namespace FlappyBird
 
         private void Awake()
         {
+            Screen.sleepTimeout = SleepTimeout.NeverSleep;
 #if UNITY_ANDROID && ENABLE_TENSORFLOW
             Logger.Print("GameManager.Awake - TensorFlowSharp.Android.NativeBinding.Init called.");
             TensorFlowSharp.Android.NativeBinding.Init();

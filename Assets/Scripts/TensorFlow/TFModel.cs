@@ -31,7 +31,17 @@ public class TFModel
         try
         {
             Logger.Print("Load TF model from '{0}'", modelPath);
-            byte[] bytes = File.ReadAllBytes(modelPath);
+            byte[] bytes = null;
+            if (modelPath.Contains("://"))
+            {
+                WWW www = new WWW(modelPath);
+                while (!www.isDone) ;
+                bytes = www.bytes;
+            }
+            else
+            {
+                bytes = File.ReadAllBytes(modelPath);
+            }
             if (bytes == null || bytes.Length == 0)
             {
                 Logger.Error("TFModel.LoadModelFromPath - failed to load tf model from '{0}'", modelPath);
@@ -39,6 +49,7 @@ public class TFModel
             }
             Logger.Print("Try to import data bytes, length: {0}", bytes.Length);
             _tfGraph.Import(bytes);
+
             Logger.Print("Create session...");
             _session = new TFSession(_tfGraph);
         }
@@ -59,7 +70,17 @@ public class TFModel
         try
         {
             Logger.Print("TFModel.LoadGraphDef - Load TF graph def from '{0}'", graphPath);
-            byte[] bytes = File.ReadAllBytes(graphPath);
+            byte[] bytes = null;
+            if (graphPath.Contains("://"))
+            {
+                WWW www = new WWW(graphPath);
+                while (!www.isDone) ;
+                bytes = www.bytes;
+            }
+            else
+            {
+                bytes = File.ReadAllBytes(graphPath);
+            }
             if (bytes == null || bytes.Length == 0)
             {
                 Logger.Error("TFModel.LoadGraphDef - failed to load tf model from '{0}'", graphPath);
@@ -67,6 +88,7 @@ public class TFModel
             }
             TFBuffer graphDef = new TFBuffer(bytes);
             Logger.Print("Try to import graphDef, bytes length: {0}", bytes.Length);
+
             _tfGraph.Import(graphDef);
             Logger.Print("Create session...");
             _session = new TFSession(_tfGraph);
@@ -85,7 +107,7 @@ public class TFModel
     {
         if (!_bModelLoaded)
             return null;
-        var runner = _session.GetRunner();
+        TFSession.Runner runner = _session.GetRunner();
         runner.AddInput(_tfGraph[inputNode][0], intput);
         runner.Fetch(_tfGraph[outputNode][0]);
         TFTensor[] output = runner.Run();
@@ -98,8 +120,8 @@ public class TFModel
         if (!_bModelLoaded)
             return null;
 
-        var runner = _session.GetRunner();
         var tensor = TFTensor.FromBuffer(new TFShape(1, inputData.Length), inputData, 0, inputData.Length);
+        TFSession.Runner runner = _session.GetRunner();
         runner.AddInput(_tfGraph[inputNode][0], tensor);
         runner.Fetch(_tfGraph[outputNode][0]);
         TFTensor[] output = runner.Run();

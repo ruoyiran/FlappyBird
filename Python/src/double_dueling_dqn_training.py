@@ -30,6 +30,9 @@ class ExperienceBuffer(object):
     def sample(self, size):
         return np.reshape(np.asarray(random.sample(self.buffer, size)), [size, 5])
 
+    def size(self):
+        return len(self.buffer)
+
 def update_target_graph(tfVars, tau):
     total_vars = len(tfVars)
     op_hoder = []
@@ -68,7 +71,7 @@ if __name__ == "__main__":
         mainQN = DeepQNetwork(h_size, n_actions, learning_rate)
     with tf.variable_scope("TargetQNetwork"):
         targetQN = DeepQNetwork(h_size, n_actions, learning_rate)
-    pre_train_steps = 50000
+    pre_train_steps = 0# 50000
     total_steps = 2000000
     anneling_steps = 50000.
     input_size = GameConfig.target_size * GameConfig.target_size * GameConfig.n_channels
@@ -92,13 +95,13 @@ if __name__ == "__main__":
             writer = tf.summary.FileWriter(logdir="../log", graph=sess.graph)
             writer.close()
 
-        # checkpoint = tf.train.get_checkpoint_state(model_dir)
-        # if checkpoint and checkpoint.model_checkpoint_path:
-        #     saver.restore(sess, checkpoint.model_checkpoint_path)
-        #     print("Successfully loaded:", checkpoint.model_checkpoint_path)
-        # else:
-        #     print("Could not find old network weights")
-        sess.run(tf.global_variables_initializer())
+        checkpoint = tf.train.get_checkpoint_state(model_dir)
+        if checkpoint and checkpoint.model_checkpoint_path:
+            saver.restore(sess, checkpoint.model_checkpoint_path)
+            print("Successfully loaded:", checkpoint.model_checkpoint_path)
+        else:
+            print("Could not find old network weights")
+            sess.run(tf.global_variables_initializer())
         update_target(targetOps, sess)
         s = env.reset()
         s_t = dp.get_state_stacked_image(sess, s)
@@ -110,6 +113,7 @@ if __name__ == "__main__":
         is_saved = False
         for step in range(total_steps + 1):
             if np.random.rand(1) < e:
+                print("================= Random Action ====================")
                 a = np.random.randint(0, n_actions)
             else:
                 a = sess.run(mainQN.predict, feed_dict={mainQN.input_x: [s_t]})[0]
@@ -147,7 +151,7 @@ if __name__ == "__main__":
                     curr_lr = sess.run(mainQN.lr)
                     if curr_lr > final_learning_rate:
                         sess.run(tf.assign(mainQN.lr, curr_lr/10.0))
-                if step % update_freq == 0:
+                if step % update_freq == 0 and experience_buffer.size() >= batch_size:
                     is_saved = False
                     train_batch = experience_buffer.sample(batch_size)
                     inputs = np.reshape(np.vstack(train_batch[:, 3]),
