@@ -57,6 +57,32 @@ def export_image_preprocessing_graph():
     tf.train.write_graph(graph, "../graphs", 'image_preprocess_graph_def.pb', as_text=False)
     return input_x, stacked_x
 
+def export_image_resize_graph():
+    graph = tf.Graph()
+    with graph.as_default():
+        with tf.name_scope("Input"):
+            input_x = tf.placeholder(dtype=tf.uint8, shape=(None, GameConfig.image_width * GameConfig.image_height),
+                                     name="input_x")
+        with tf.name_scope("Reshape"):
+            x_reshape = tf.reshape(input_x, shape=(-1, GameConfig.image_width, GameConfig.image_height, 1),
+                                   name="reshaped_x")
+        with tf.name_scope("Target"):
+            resized_x = tf.image.resize_area(x_reshape, (GameConfig.target_size, GameConfig.target_size),
+                                             name="resized_x")
+            resized_x = tf.squeeze(resized_x, [3])
+            stacked_x = tf.stack((resized_x, resized_x, resized_x, resized_x), axis=-1, name="stacked_x")
+
+        with tf.name_scope("NextTarget"):
+            input_stacked_x = tf.placeholder(dtype=tf.float32,
+                                             shape=(None, GameConfig.target_size, GameConfig.target_size, 4),
+                                             name="input_stacked_x")
+            next_stacked_x = tf.stack((resized_x, input_stacked_x[:, :, :, 0], input_stacked_x[:, :, :, 1], input_stacked_x[:, :, :, 2]),
+                                      axis=-1,
+                                      name="output_stacked_x")
+
+    tf.train.write_graph(graph, "../graphs", 'image_resize_graph_def.pb', as_text=False)
+    return input_x, stacked_x
+
 def export_training_model():
     GameConfig.target_size = 84
     GameConfig.n_channels = 4
@@ -102,8 +128,7 @@ def test_tfgraph():
         plt.show()
 
 if __name__ == '__main__':
-    export_image_preprocessing_graph()
-    export_training_model()
-
-
+    # export_image_preprocessing_graph()
+    # export_training_model()
+    export_image_resize_graph()
 

@@ -1,7 +1,7 @@
-﻿using System;
+﻿#if ENABLE_TENSORFLOW
+using System;
 using System.IO;
 
-#if ENABLE_TENSORFLOW
 using TensorFlow;
 using UnityEngine;
 
@@ -120,7 +120,8 @@ public class TFModel
         if (!_bModelLoaded)
             return null;
 
-        var tensor = TFTensor.FromBuffer(new TFShape(1, inputData.Length), inputData, 0, inputData.Length);
+        //var tensor = TFTensor.FromBuffer(new TFShape(1, inputData.Length), inputData, 0, inputData.Length);
+        var tensor = new TFTensor(inputData);
         TFSession.Runner runner = _session.GetRunner();
         runner.AddInput(_tfGraph[inputNode][0], tensor);
         runner.Fetch(_tfGraph[outputNode][0]);
@@ -134,7 +135,8 @@ public class TFModel
             return null;
 
         var runner = _session.GetRunner();
-        var currStateTensor = TFTensor.FromBuffer(new TFShape(1, inputData.Length), inputData, 0, inputData.Length);
+        //var currStateTensor = TFTensor.FromBuffer(new TFShape(1, inputData.Length), inputData, 0, inputData.Length);
+        var currStateTensor = new TFTensor(inputData);
 
         runner.AddInput(_tfGraph[currInputNode][0], currStateTensor);
         runner.AddInput(_tfGraph[nextStateInputNode][0], nextStateTensor);
